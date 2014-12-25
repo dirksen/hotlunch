@@ -1,0 +1,107 @@
+| [[^ submitted ]]
+h2 Hot Lunch Order
+form.pure-form.pure-form-stacked
+  label(for='previous-order') Order #
+  |   
+  input#previous-order(type='text', value='[[previous_order]]')
+  |   
+  fieldset
+    .pure-g-r
+      .pure-u-1-3
+        label(for='grade') Grade
+        |         
+        select#grade(required='', value='[[grade]]')
+          option(selected='', disabled='') Specify the grade
+          |           [[# GRADES ]]
+          |             
+          option [[.]]
+          |           [[/]]
+      |       
+      .pure-u-1-3
+        label(for='klass') Class #
+        |         
+        select#klass(required='', value='[[klass]]')
+          option(selected='', disabled='') Specify the class
+          |           [[# KLASS_SIG ]]
+          |             
+          option(value='[[this.0]]') [[this.1]]
+          |           [[/]]
+      |       
+      .pure-u-1-3
+        label(for='student-id') Student ID
+        |         
+        input#student-id(required='', type='text', value='[[student_id]]')
+| [[#cals]]
+table#order.form.pure-table.pure-table-bordered(outro='fade')
+  thead
+    tr
+      th(colspan='7') [[month]]
+  |   
+  tbody
+    tr
+      td(align='center') Sun
+      |       
+      td(align='center') Mon
+      |       
+      td(align='center') Tue
+      |       
+      td(align='center') Wed
+      |       
+      td(align='center') Thu
+      |       
+      td(align='center') Fri
+      |       
+      td(align='center') Sat
+    |     [[# cal ]]
+    |     
+    tr
+      | [[# . ]]
+      td.date-cell(align='center')
+        | [[ daynum ]]
+        | [[# menu[date] ]]
+        hr
+        | [[desc]]
+        |           
+        table.pure-table-horizontal.pure-table-striped
+          | [[# options:id ]]
+          tr
+            td
+              label(for='[[id]]') [[ option ]]
+            |               
+            td.cost
+              label
+                | $[[ cost ]]
+                input(required='', id='[[id]]', type='radio', name='[[selection[date]]]', value='[[id]]', data-date='[[dateString(date)]]', data-cost='[[cost]]', data-option='[[meal_type]]:[[option]]')
+          |             [[/ options ]]
+        |         [[/ menu[date] ]]
+      |       [[/ . ]]
+    |     [[/ cal ]]
+| [[/cals]]
+button.pure-button.pure-button-primary(style='margin:0 0 100px 80%', on-tap='submit') Submit
+| [[/ submitted ]]
+| [[# submitted ]]
+img.barcode(src='http://www.barcodesinc.com/generator/image.php?code=[[order_id()]]&style=197&type=C128B&width=200&height=50&xres=1&font=3')
+h2
+  | Order#[[order_id()]] for student ID [[student_id]] of grade [[grade]] class [[klass]]
+ul.notice
+  li
+    | Please print out this order, stapled with a cheque of $[[total()]], write down your contact info and hand them to your child&apos;s teacher.
+  |   
+  li
+    | If you want to modify your order, click &apos;Again&apos; button below and enter your order #[[order_id()]].
+table.pure-table-horizontal.pure-table-striped(intro='fade')
+  | [[# selection:date ]]
+  tr
+    td [[ dateString(date) ]]
+    |     
+    td [[ get_options(date, this).option ]]
+    |     
+    td $[[ get_options(date, this).cost ]]
+  |   [[/ selection ]]
+  |   
+  tr
+    td(colspan='2') Total
+    |     
+    td $[[total()]]
+button.pure-button.pure-button-primary(style='margin:0 0 100px 80%', on-tap='again') again
+| [[/ submitted ]]
