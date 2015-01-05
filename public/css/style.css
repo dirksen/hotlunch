@@ -6,3 +6,16 @@ body {
 a {
   color: #00B7FF;
 }
+
+button {
+  margin: 0 15px;
+}
+
+h2.title {
+  border-bottom: 0;
+  margin-top: 10px;
+}
+
+.text-right {
+  text-align: right;
+}
