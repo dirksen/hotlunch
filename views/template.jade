@@ -4,33 +4,33 @@ mixin mustash(exp)
   |#{ exp.replace(/[#^]/, '/') }
 
 +mustash('[[^ submitted ]]')
-  .pure-g-r
-    .pure-u-1-2
+  .row
+    .col-sm-6
       h2.title Hot Lunch Order
-    .pure-u-1-2.text-right
-      input(type='text', value='[[pin_code]]', placeholder='Enter PIN code')
-      button.pure-button.pure-button-primary(on-click='add_child') Add a Child
+    .col-sm-6.text-right
+      input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN')
+      button.btn.btn-primary(on-click='add_child') Add a Child
   hr
 
   +mustash('[[#orders]]')
     div(intro-outro='fade')
-      form.pure-form
+      form.form
         fieldset
-          .pure-g-r
-            .pure-u-1-3
+          .row
+            .col-sm-4
               label(for='teacher-select') Class
-              select#teacher-select(required='', value='[[teacher]]')
+              select#teacher-select.form-control(required='', value='[[teacher]]')
                 option(selected='', disabled='') Specify the teacher of the class
                 +mustash('[[# GRADES ]]')
                   option [[.]]
-            .pure-u-1-3
+            .col-sm-4
               label(for='parent-name-box') Your name
-              input#parent-name-box(type='text', required='', value='[[parent_name]]')
-            .pure-u-1-3
+              input.form-control#parent-name-box(type='text', required='', value='[[parent_name]]')
+            .col-sm-4
               label(for='child-name-box') Your child's name
-              input#child-name-box(type='text', required='', value='[[child_name]]')
+              input.form-control#child-name-box(type='text', required='', value='[[child_name]]')
       +mustash('[[#cals]]')
-        table#order.form.pure-table.pure-table-bordered(outro='fade')
+        table#order.form.table.table.table-bordered(outro='fade')
           thead
             tr
               th(colspan='7') [[month]]
@@ -51,15 +51,15 @@ mixin mustash(exp)
                     +mustash('[[# menu[date] ]]')
                       hr
                       |[[desc]]
-                      table.pure-table-horizontal.pure-table-striped
+                      table.table.table-striped
                         +mustash('[[# options:id ]]')
                           tr
                             td
                               label(for='[[id]]') [[ option ]]
                             td.cost
                               label $[[ cost ]]
-                                input(required='', id='[[id]]', type='radio', name='[[selection[date]]]', value='[[id]]', data-date='[[dateString(date)]]', data-cost='[[cost]]', data-option='[[meal_type]]:[[option]]')
-      button.pure-button.pure-button-primary(style='margin:0 0 100px 80%', on-tap='submit') Submit
+                                input.form-control(required='', id='[[id]]', type='radio', name='[[selection[date]]]', value='[[id]]', data-date='[[dateString(date)]]', data-cost='[[cost]]', data-option='[[meal_type]]:[[option]]')
+      button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='submit') Submit
 
 +mustash('[[# submitted ]]')
   img.barcode(src='http://www.barcodesinc.com/generator/image.php?code=[[order_id()]]&style=197&type=C128B&width=200&height=50&xres=1&font=3')
@@ -67,7 +67,7 @@ mixin mustash(exp)
   ul.notice
     li Please print out this order, stapled with a cheque of $[[total()]], write down your contact info and hand them to your child&apos;s teacher.
     li If you want to modify your order, click &apos;Again&apos; button below and enter your order # [[order_id()]].
-  table.pure-table-horizontal.pure-table-striped(intro='fade')
+  table.table.table-striped(intro='fade')
     +mustash('[[# selection:date ]]')
       tr
         td [[ dateString(date) ]]
@@ -76,4 +76,4 @@ mixin mustash(exp)
     tr
       td(colspan='2') Total
       td $[[total()]]
-  button.pure-button.pure-button-primary(style='margin:0 0 100px 80%', on-tap='again') again
+  button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='again') again
