@@ -1,21 +1,33 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  width: 90%;
+  margin:auto
 }
+
+h2 {
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0 0 10px 0;
+  font-size: 18px
+}
+
+label {width: 100%; display:inline-block; cursor: pointer;}
+
+.notice {
+  background: #1f8dd6;
+  padding: 0.3em 1em;
+  border-radius: 3px;
+  color: #fff;
+}
+
+.date-cell {height:50px; font-size:12px}
+
+.cost {width: 8px; white-space: nowrap;}
 
 a {
   color: #00B7FF;
 }
 
-button {
-  margin: 0 15px;
-}
-
-h2.title {
-  border-bottom: 0;
-  margin-top: 10px;
-}
-
-.text-right {
-  text-align: right;
+h2 {
+  margin-top: 50px;
 }
