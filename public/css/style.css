@@ -1,14 +1,17 @@
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  width: 90%;
   margin:auto
+}
+
+.container {
+  //padding-left: 0!important;
 }
 
 h2 {
   border-bottom: 1px solid #e5e5e5;
   padding: 0 0 10px 0;
   font-size: 18px
+  margin-top: 50px;
 }
 
 label {width: 100%; display:inline-block; cursor: pointer;}
@@ -20,7 +23,11 @@ label {width: 100%; display:inline-block; cursor: pointer;}
   color: #fff;
 }
 
-.date-cell {height:50px; font-size:12px}
+.date-cell {height:30px; font-size:9px}
+
+.date-cell .agenda {
+  font-size: 12px;
+}
 
 .cost {width: 8px; white-space: nowrap;}
 
@@ -28,6 +35,46 @@ a {
   color: #00B7FF;
 }
 
-h2 {
-  margin-top: 50px;
+th, td {
+  max-width: 200px;
+  vertical-align: top;
 }
+
+td select {
+  margin-right: 5px;
+}
+
+td img {
+  padding: 5px;
+}
+
+#order-summary {
+  width: 450px;
+}
+
+#order-summary.affix {
+  top: 10px;
+}
+
+.order-calendars.blank {
+  min-height: 900px;
+}
+
+.calendar {
+  margin-left: 500px;
+}
+
+#total-cost {
+  margin-top: 5px;
+}
+
+.panel {
+  padding: 5px;
+  overflow: scroll;
+}
+
+.bg-danger {
+  transition: opacity 5s ease-in-out;
+
+}
+

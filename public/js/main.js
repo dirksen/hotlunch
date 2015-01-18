@@ -1,3 +1,30 @@
+$.holdReady(true);
+
+previous_selection = {
+  "Sat Oct 04 2014 00:00:00 GMT-0400 (EDT)":2,
+  "Sat Oct 18 2014 00:00:00 GMT-0400 (EDT)":3,
+  "Tue Nov 18 2014 00:00:00 GMT-0500 (EST)":7
+};
+dates = [];
+agendas = {};
+menu.forEach(function(d, idx){
+  realdate = new Date(d.date);
+  d.idx = idx;
+  agendas[realdate] = d;
+  dates.push(realdate);
+});
+
+var min_date = new Date(Math.min.apply(null, dates))
+, max_date = new Date(Math.max.apply(null, dates))
+, min_month = min_date.getMonth()
+, max_month = max_date.getMonth()
+, year = min_date.getFullYear()
+, cals = []
+, submitted = false
+, listen_to_scrolling = true
+, mid_height = document.documentElement.clientHeight / 2
+;
+
 function cal(year, month) {
   var first = (new Date(year, month))
   , last = new Date(year, month+1, 0)
@@ -6,7 +33,7 @@ function cal(year, month) {
     date = new Date(year, month, d);
     days.push({
       date: date,
-      agenda: menu[date],
+      agenda: agendas[date],
       daynum: d,
     });
   }
@@ -22,29 +49,12 @@ function cal(year, month) {
   }
   return cal;
 }
-previous_selection = {
-  "Sat Oct 04 2014 00:00:00 GMT-0400 (EDT)":2,
-  "Sat Oct 18 2014 00:00:00 GMT-0400 (EDT)":3,
-  "Tue Nov 18 2014 00:00:00 GMT-0500 (EST)":7
-};
-dates = [];
-for (d in menu){
-  realdate = new Date(d);
-  menu[realdate] = menu[d];
-  delete menu[d];
-  dates.push(realdate);
-}
-var min_date = new Date(Math.min.apply(null, dates))
-, max_date = new Date(Math.max.apply(null, dates))
-, min_month = min_date.getMonth()
-, max_month = max_date.getMonth()
-, year = min_date.getFullYear()
-, cals = []
-;
+
 for (var m = min_month; m <= max_month; m ++) {
   var month = year + '-' + (m+1);
   cals.push({month:month, cal:cal(year, m)});
 }
+
 function order_id(){
   return ractive.get('grade') + ractive.get('klass') + ractive.get('student_id')
 }
@@ -53,35 +63,72 @@ function get_options(date, option_id) {
 }
 
 var data = {
-  GRADES: ['Ms. Shim', 'Mr. De Ponte', 'Ms. Crocket'],
+  GRADES: ['Ms. Shim', 'Mr. Da Ponte', 'Ms. Crockett'],
   orders: [],
   menu:menu,
   cals:cals,
-  selection: {},
-  submitted:false,
+  active_order_idx:0,
+  total: 0,
+
   dateString: function(d) {
-    return (new Date(d)).toDateString();
+    return (new Date(d)).toDateString().replace(/ \d+$/, '');
   },
-  order_id: order_id,
-  get_options: get_options,
-  total: function() {
-    var t = 0;
-    var selection = this.get('selection');
-    for(var d in selection) {
-      var oid = selection[d];
-      if (oid)
-        t += parseInt(get_options(d, oid).cost);
-    }
-    return t;
+  line_total: function (day_idx, option_idx, quantity) {
+    var agenda = menu[day_idx];
+    var cost = agenda.options[option_idx].cost
+    var total = cost * quantity;
+    if (agenda.meal_type === 'pizza' && quantity > 0) total++;
+    return total;
   },
 },
+
 ractive = new Ractive({
   el: 'container',
   template: '#template',
   delimiters: [ '[[', ']]' ],
   magic: true,
   data: data,
+  show_cal: function(order_idx){
+    $.scrollTo('#order-cal-'+order_idx, 1000);
+    listen_to_scrolling = false;
+    setTimeout(function(){listen_to_scrolling = true}, 3000);
+  },
+  add_child: function(){
+    ractive.push('orders', {});
+    data.orders.slice(-1)[0].teacher=null;
+    setTimeout(function(){
+      $.scrollTo('.order-calendars:last', 'slow', {offset: {top: -50}});
+    }, 100);
+  },
+  submit: function() {
+    var msg = "Once submitted, you cannot change the order. Are you sure you want to go ahead?";
+    if (confirm(msg)) {
+      data.submitted = true;
+    }
+  },
+  oncomplete: function(){
+    if (location.search == '?demo') {
+      data.parent_name = 'Ducksing';
+      data.phone = '0123456789';
+      data.pin_code = '12345';
+      ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte","order_per_day":[[3],[3,3,3,2],[4,0,0,0]]},{"child_name":"adsf","teacher":"Mr. Da Ponte","order_per_day":[[0],[5,3,0,2],[0,0,0,0]]}]);
+    }
+    $.holdReady(false);
+  },
 });
+
+
+ractive.observe('pin_code parent_name phone', function(new_value, old, keypath) {
+  data.pin_error = (data.pin_code.length >= 5 && data.pin_code != '12345');
+  if (!data.pin_error && /\d{2}/.test(data.phone) && data.parent_name && data.orders.length === 0) {
+    data.loggedin = (data.pin_code.length === 5 && data.pin_code === '12345');
+    if (data.loggedin) {
+      data.orders = [{}];
+      $('#order-summary').affix({offset:{top:180}});
+    }
+  }
+});
+
 ractive.observe('previous_order', function(new_value, old, keypath) {
   if (new_value) {
     if (/^\\d/.test(new_value)) {
@@ -100,24 +147,41 @@ ractive.observe('previous_order', function(new_value, old, keypath) {
     }
     if (new_value) {
       ractive.set('student_id', new_value);
-      ractive.set('selection', previous_selection);
     }
   }
 });
+
+ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) {
+  var total = 0;
+  var keypath_parts = keypath.split('.');
+  var order_idx = keypath_parts[1];
+  var day_idx = keypath_parts[3];
+  var option_idx = keypath_parts[4];
+  setTimeout(function(){
+    var $hot_item = $('#line-item-'+order_idx+'-'+day_idx+'-'+option_idx);
+    if ($hot_item.length) {
+      $('.order-tables.panel').scrollTo($hot_item, 1000, 'elasout');
+      $hot_item.addClass('bg-danger');
+      setTimeout(function(){
+        $hot_item.removeClass('bg-danger');
+      }, 3000);
+    }
+  }, 100);
+  $.each(data.orders, function(order_idx, order) {
+    if (order.order_per_day) {
+      $.each(order.order_per_day, function(day_idx, quantities) {
+        $.each(quantities, function(option_idx, quantity) {
+          total += data.line_total(day_idx, option_idx, quantity);
+        });
+      })
+    }
+  });
+  data.total = total;
+});
+
 ractive.on({
-  add_child: function(){
-    data.orders.unshift({});
-  },
-  submit: function(){
-    this.set('submitted', true);
-    window.setTimeout(500, function(){
-      window.scrollTo(0,0);
-    });
-  },
   again: function(){
     this.set('submitted', false);
-    previous_selection[order_id()] = ractive.get('selection');
-    ractive.set('selection', {});
     ractive.set('grade', null);
     ractive.set('klass', null);
     ractive.set('student_id', null);
@@ -128,3 +192,31 @@ ractive.on({
   },
 });
 
+$(function(){
+  function adjust_screen(){
+    mid_height = $(window).height() / 2;
+    $('#order-summary .panel').css('max-height', document.documentElement.clientHeight - $('#order-summary .btn-toolbar').height()*2);
+  }
+  adjust_screen();
+  $(window).scroll(function(evt){
+    var $body = $('body');
+    var ratio = $body.scrollTop() * 1.0 / $body.height();
+
+    $('.order-calendars').each(function(idx){
+      var top = this.getBoundingClientRect().top;
+      var bottom = this.getBoundingClientRect().bottom;
+      if (data.active_order_idx !== idx && top < mid_height && bottom > mid_height) {
+        data.active_order_idx = idx;
+        if (!listen_to_scrolling) return;
+        var $order = $('#order-' + idx);
+        var $order_panel = $('#order-summary .panel');
+        var top = $order.position.top;
+        if (top < 0 || top > $order_panel.height() - 30);
+          $order_panel.scrollTo($order, 1000);
+        return;
+      }
+    });
+  }).resize(function(evt){
+    adjust_screen();
+  });
+});

@@ -1,79 +1,111 @@
 mixin ___(exp)
-  |#{ exp }
+  |!{ exp }
   block
-  |#{ exp.replace(/[#^]/, '/') }
+  |!{ exp.replace(/[#^]/, '/') }
+
 
 +___('[[^ submitted ]]')
-  .row
-    .col-sm-6
-      h2.title Hot Lunch Order
-    .col-sm-6.text-right
-      input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN')
-      button.btn.btn-primary(on-click='add_child') Add a Child
+  h1 Hot Lunch Order
+
+  p Please type in your name, phone number, and the PIN code found in the notice brought home by your children.
+  p: b If you receive multiple PIN codes, pick one and discard the others.
+
+  form.form-inline(class="[[pin_error?'has-error':'']] [[loggedin?'has-success':'']]")
+    .form-group
+      input.form-control(type='text', value='[[parent_name]]', placeholder='Your Name')  
+      | &nbsp;
+    .form-group
+      input.form-control(type='text', value='[[phone]]', placeholder='Phone')  
+    .form-group
+      input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN', disabled='[[loggedin]]')
+    +___('[[# pin_error ]]')
+      .form-group(intro-outro='fade')
+        label.control-label Invalid pin. Please try again.
   hr
 
-  +___('[[#orders]]')
-    div(intro-outro='fade')
-      form.form
-        fieldset
-          .row
-            .col-sm-4
-              label(for='teacher-select') Class
-              select#teacher-select.form-control(required='', value='[[teacher]]')
-                option(selected='', disabled='') Specify the teacher of the class
-                +___('[[# GRADES ]]')
-                  option [[.]]
-            .col-sm-4
-              label(for='parent-name-box') Your name
-              input.form-control#parent-name-box(type='text', required='', value='[[parent_name]]')
-            .col-sm-4
-              label(for='child-name-box') Your child's name
-              input.form-control#child-name-box(type='text', required='', value='[[child_name]]')
-      +___('[[#cals]]')
-        table#order.form.table.table.table-bordered(outro='fade')
-          thead
-            tr
-              th(colspan='7') [[month]]
-          tbody
-            tr
-              td(align='center') Sun
-              td(align='center') Mon
-              td(align='center') Tue
-              td(align='center') Wed
-              td(align='center') Thu
-              td(align='center') Fri
-              td(align='center') Sat
-            +___('[[# cal ]]')
-              tr
-                +___('[[# this ]]')
-                  td.date-cell(align='center')
-                    |[[ daynum ]]
-                    +___('[[# menu[date] ]]')
-                      hr
-                      |[[desc]]
-                      table.table.table-striped
-                        +___('[[# options:id ]]')
-                          tr
-                            td
-                              label(for='[[id]]') [[ option ]]
-                            td.cost
-                              label $[[ cost ]]
-                                input.form-control(required='', id='[[id]]', type='radio', name='[[selection[date]]]', value='[[id]]', data-date='[[dateString(date)]]', data-cost='[[cost]]', data-option='[[meal_type]]:[[option]]')
-      button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='submit') Submit
+  +___('[[# orders.length > 0 ]]')
+    #order-summary.pull-left(intro='fade')
+      .order-tables.panel.panel-default
+        +___('[[# orders:order_idx ]]')
+          table.table.table-bordered(id='order-[[ order_idx ]]')
+            tbody
+              tr(class="[[ order_idx === active_order_idx ? 'info':'']]")
+                td(colspan=3)
+                  form.form-inline
+                    .form-group
+                      input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Your child's name")
+                    .form-group
+                      select#teacher-select.form-control(value='[[this.teacher]]')
+                        option(selected='', disabled='') Class
+                        +___('[[# GRADES ]]')
+                          option [[.]]
+                    a.btn.btn-default.glyphicon.glyphicon-chevron-right(class="[[ order_idx === active_order_idx ? 'btn-info':'']]", on-tap='show_cal(order_idx)')
+              +___('[[# order_per_day:day_idx ]]')
+                +___('[[# this:option_idx ]]')
+                  +___('[[# this ]]')
+                    tr(id="line-item-[[order_idx]]-[[day_idx]]-[[option_idx]]")
+                      td [[ dateString(menu[day_idx].date) ]]
+                      td [[ this ]] [[ menu[day_idx].options[option_idx].option ]]
+                      td $[[ line_total(day_idx, option_idx, this) ]]
+
+      .btn-toolbar
+        .btn-group
+          button.btn.btn-primary(on-tap='add_child()')
+            i.glyphicon.glyphicon-plus
+            |  Add a child
+          button.btn.btn-primary(on-tap='submit()') Submit
+          // button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='again') again
+        +___('[[# total ]]')
+          h3#total-cost.pull-right(intro-outro='fade') Total $[[total]]
+
+  +___('[[# orders.length && !submitted ]]')
+    +___('[[# orders:order_idx ]]')
+      .order-calendars(id="order-cal-[[ order_idx ]]", class=[[ child_name && teacher ? '' : 'blank' ]])
+        +___('[[# child_name && teacher ]]')
+          .calendar(intro-outro='fly:{x:200,easing: "cubic-bezier(.17,.67,.25,1.5)"}', class="[[ order_idx === active_order_idx ? '':'text-muted' ]]")
+            h2.alert.alert-info [[child_name]]
+            +___('[[#cals]]')
+              table.form.form-inline.table.table.table-bordered(outro='fade')
+                thead.small
+                  tr
+                    th(colspan='7') [[month]]
+                tbody
+                  tr.small
+                    td(align='center') Sun
+                    td(align='center') Mon
+                    td(align='center') Tue
+                    td(align='center') Wed
+                    td(align='center') Thu
+                    td(align='center') Fri
+                    td(align='center') Sat
+                  +___('[[# cal ]]')
+                    tr
+                      +___('[[# this ]]')
+                        td.date-cell
+                          .pull-left [[ daynum ]]
+                          +___('[[# agenda ]]')
+                            .agenda(intro-outro='fade')
+                              .text-warning.clearfix
+                                img.pull-left(src='/images/[[meal_type]].png')
+                                | [[ desc ]]
+                              .list-group
+                                +___('[[# options:option_idx ]]')
+                                  a.list-group-item
+                                    select.form-control(value='[[ orders[order_idx].order_per_day[agenda.idx][option_idx] ]]', style="color:[[ orders[order_idx].order_per_day[agenda.idx][option_idx] ? '#337AB7':'' ]]")
+                                      +___('[[# [0,1,2,3,4,5] ]]')
+                                        option [[ . ]]
+                                    | [[ option ]]&nbsp;
+                                    span.text-danger ($[[ cost ]])
 
 +___('[[# submitted ]]')
-  img.barcode(src='http://www.barcodesinc.com/generator/image.php?code=[[order_id()]]&style=197&type=C128B&width=200&height=50&xres=1&font=3')
-  h2 Order# [[order_id()]] for student ID [[student_id]] of teacher [[teacher]] class [[klass]]
-  ul.notice
-    li Please print out this order, stapled with a cheque of $[[total()]], write down your contact info and hand them to your child&apos;s teacher.
-    li If you want to modify your order, click &apos;Again&apos; button below and enter your order # [[order_id()]].
-  table.table.table-striped(intro='fade')
-    +___('[[# selection:date ]]')
-      tr
-        td [[ dateString(date) ]]
-        td [[ get_options(date, this).option ]]
-        td $[[ get_options(date, this).cost ]]
-    tr
-      td(colspan='2') Total
-      td $[[total()]]
-  button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='again') again
+  h2 Hot Lunch Order Total $[[ total ]]
+
+  .alert.alert-success Thank you for supporting our Hot Lunch Program!
+
+  ul.list-group
+    li.list-group-item Please return the notice (the one with the PIN), with either cash or cheque to your child's teacher.
+    li.list-group-item If you're ordering for multiple children, return the package to the teacher of your eldest kid's.
+    li.list-group-item If you prefer to pay by cheque, pLease make sure:
+      ul
+        li Address to 'Parkview Publich School'.
+        li Put your child's name on the memo field of the cheque.
