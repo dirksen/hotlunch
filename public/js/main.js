@@ -1,22 +1,24 @@
 $.holdReady(true);
-var min_date = new Date(Math.min.apply(null, dates))
-, max_date = new Date(Math.max.apply(null, dates))
-, min_month = min_date.getMonth()
-, max_month = max_date.getMonth()
-, year = min_date.getFullYear()
-, cals = []
+
+var cals = []
 , submitted = false
 , listen_to_scrolling = true
 , dates = []
 , agendas = {}
 ;
 
-menu.forEach(function(d, idx){
-  realdate = new Date(d.date);
-  d.idx = idx;
-  agendas[realdate] = d;
+$.each(menu, function(idx){
+  realdate = new Date(this.date);
+  this.idx = idx;
+  agendas[realdate] = this;
   dates.push(realdate);
 });
+
+var min_date = new Date(Math.min.apply(null, dates))
+, max_date = new Date(Math.max.apply(null, dates))
+, min_month = min_date.getMonth()
+, max_month = max_date.getMonth()
+, year = min_date.getFullYear()
 
 function cal(year, month) {
   var first = (new Date(year, month))
@@ -88,6 +90,7 @@ ractive = new Ractive({
   },
   add_child: function(){
     ractive.push('orders', {});
+    // Somehow ractive set the teach to the first option
     data.orders.slice(-1)[0].teacher=null;
     setTimeout(function(){
       $.scrollTo('.order-calendars:last', 'slow', {offset: {top: -50}});
