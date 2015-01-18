@@ -1,19 +1,4 @@
 $.holdReady(true);
-
-previous_selection = {
-  "Sat Oct 04 2014 00:00:00 GMT-0400 (EDT)":2,
-  "Sat Oct 18 2014 00:00:00 GMT-0400 (EDT)":3,
-  "Tue Nov 18 2014 00:00:00 GMT-0500 (EST)":7
-};
-dates = [];
-agendas = {};
-menu.forEach(function(d, idx){
-  realdate = new Date(d.date);
-  d.idx = idx;
-  agendas[realdate] = d;
-  dates.push(realdate);
-});
-
 var min_date = new Date(Math.min.apply(null, dates))
 , max_date = new Date(Math.max.apply(null, dates))
 , min_month = min_date.getMonth()
@@ -22,8 +7,16 @@ var min_date = new Date(Math.min.apply(null, dates))
 , cals = []
 , submitted = false
 , listen_to_scrolling = true
-, mid_height = document.documentElement.clientHeight / 2
+, dates = []
+, agendas = {}
 ;
+
+menu.forEach(function(d, idx){
+  realdate = new Date(d.date);
+  d.idx = idx;
+  agendas[realdate] = d;
+  dates.push(realdate);
+});
 
 function cal(year, month) {
   var first = (new Date(year, month))
@@ -179,22 +172,12 @@ ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) 
   data.total = total;
 });
 
-ractive.on({
-  again: function(){
-    this.set('submitted', false);
-    ractive.set('grade', null);
-    ractive.set('klass', null);
-    ractive.set('student_id', null);
-    ractive.set('previous_order', null);
-    window.setTimeout(500, function(){
-      window.scrollTo(0,0);
-    });
-  },
-});
+
+/* Jquery section
+ */
 
 $(function(){
   function adjust_screen(){
-    mid_height = $(window).height() / 2;
     $('#order-summary .panel').css('max-height', document.documentElement.clientHeight - $('#order-summary .btn-toolbar').height()*2);
   }
   adjust_screen();
@@ -205,6 +188,7 @@ $(function(){
     $('.order-calendars').each(function(idx){
       var top = this.getBoundingClientRect().top;
       var bottom = this.getBoundingClientRect().bottom;
+      var mid_height = $(window).height() / 2;
       if (data.active_order_idx !== idx && top < mid_height && bottom > mid_height) {
         data.active_order_idx = idx;
         if (!listen_to_scrolling) return;
