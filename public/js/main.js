@@ -82,7 +82,7 @@ var data = {
     var agenda = menu[day_idx];
     var cost = agenda.options[option_idx].cost
     var total = cost * quantity;
-    if (agenda.meal_type === 'pizza' && quantity > 0) total++;
+    if (agenda.meal_type.toLowerCase() === 'pizza' && quantity > 0) total++;
     return total;
   },
 },
