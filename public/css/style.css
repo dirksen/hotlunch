@@ -36,16 +36,12 @@ a {
 }
 
 th, td {
-  max-width: 200px;
+  max-width: 300px;
   vertical-align: top;
 }
 
 td select {
   margin-right: 5px;
-}
-
-td img {
-  padding: 5px;
 }
 
 #order-summary {

@@ -83,9 +83,10 @@ mixin ___(exp)
                           .pull-left [[ daynum ]]
                           +___('[[# agenda ]]')
                             .agenda(intro-outro='fade')
-                              .text-warning.clearfix
-                                img.pull-left(src='/images/[[meal_type]].png')
-                                | [[ desc ]]
+                              .text-warning.clearfix.text-center
+                                +___('[[# meal_type.toLowerCase() !== "pita" ]]')
+                                  img.pull-right(src='/images/[[meal_type.toLowerCase()]].png')
+                                | [[ meal_type ]]
                               .list-group
                                 +___('[[# options:option_idx ]]')
                                   a.list-group-item
