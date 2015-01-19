@@ -5,6 +5,16 @@ var cals = []
 , listen_to_scrolling = true
 , dates = []
 , agendas = {}
+, user_id = null
+, scrn_lock_style = { css: {
+  border: 'none',
+  padding: '15px',
+  backgroundColor: '#000',
+  '-webkit-border-radius': '10px',
+  '-moz-border-radius': '10px',
+  opacity: .5,
+  color: '#fff'
+} }
 ;
 
 $.each(menu, function(idx){
@@ -99,29 +109,47 @@ ractive = new Ractive({
   submit: function() {
     var msg = "Once submitted, you cannot change the order. Are you sure you want to go ahead?";
     if (confirm(msg)) {
-      data.submitted = true;
+      $.blockUI(scrn_lock_style);
+      $.post('/submit-orders', {
+        user_id:data.user_id,
+        pin_code: data.pin_code,
+        orders: JSON.stringify(data.orders),
+      }, function(rslt){
+        console.log(rslt);
+        data.submitted = true;
+        $.unblockUI();
+      });
+
     }
   },
   oncomplete: function(){
     if (location.search == '?demo') {
-      data.parent_name = 'Ducksing';
-      data.phone = '0123456789';
-      data.pin_code = '12345';
-      ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte","order_per_day":[[3],[3,3,3,2],[4,0,0,0]]},{"child_name":"adsf","teacher":"Mr. Da Ponte","order_per_day":[[0],[5,3,0,2],[0,0,0,0]]}]);
+      data.pin_code = 'demo9';
+      ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte",}]);
     }
     $.holdReady(false);
   },
 });
 
 
-ractive.observe('pin_code parent_name phone', function(new_value, old, keypath) {
-  data.pin_error = (data.pin_code.length >= 5 && data.pin_code != '12345');
-  if (!data.pin_error && /\d{2}/.test(data.phone) && data.parent_name && data.orders.length === 0) {
-    data.loggedin = (data.pin_code.length === 5 && data.pin_code === '12345');
-    if (data.loggedin) {
-      data.orders = [{}];
-      $('#order-summary').affix({offset:{top:180}});
-    }
+ractive.observe('pin_code', function(new_value, old, keypath) {
+  if (!data.loggedin && data.pin_code.length === 5) {
+    $.blockUI(scrn_lock_style);
+    // Authenticate against the server
+    $.post('/auth', {
+      pin_code: data.pin_code,
+    }, function(rslt) {
+      if ('user_id' in rslt) {
+        data.loggedin = true;
+        data.user_id = rslt.user_id;
+        data.orders = [{}];
+        $('#order-summary').affix({offset:{top:180}});
+        data.pin_error = false;
+      } else {
+        data.pin_error = true;
+      }
+      $.unblockUI();
+    });
   }
 });
 
@@ -157,9 +185,9 @@ ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) 
     var $hot_item = $('#line-item-'+order_idx+'-'+day_idx+'-'+option_idx);
     if ($hot_item.length) {
       $('.order-tables.panel').scrollTo($hot_item, 1000, 'elasout');
-      $hot_item.addClass('bg-danger');
+      $hot_item.addClass('bg-success');
       setTimeout(function(){
-        $hot_item.removeClass('bg-danger');
+        $hot_item.removeClass('bg-success');
       }, 3000);
     }
   }, 100);

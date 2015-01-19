@@ -7,20 +7,17 @@ mixin ___(exp)
 +___('[[^ submitted ]]')
   h1 Hot Lunch Order
 
-  p Please type in your name, phone number, and the PIN code found in the notice brought home by your children.
+  p Please type in the PIN code found in the notice brought home by your children.
   p: b If you receive multiple PIN codes, pick one and discard the others.
 
-  form.form-inline(class="[[pin_error?'has-error':'']] [[loggedin?'has-success':'']]")
-    .form-group
-      input.form-control(type='text', value='[[parent_name]]', placeholder='Your Name')  
-      | &nbsp;
-    .form-group
-      input.form-control(type='text', value='[[phone]]', placeholder='Phone')  
-    .form-group
+  +___('[[# pin_error ]]')
+    .alert.alert-warning(intro-outro='fade')
+      | Invalid pin code. Please try again or use another one.
+
+  form.form-inline(class="[[loggedin?'has-success':'']]")
+    .form-group(class="[[pin_error?'has-error':'']]")
       input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN', disabled='[[loggedin]]')
-    +___('[[# pin_error ]]')
-      .form-group(intro-outro='fade')
-        label.control-label Invalid pin. Please try again.
+
   hr
 
   +___('[[# orders.length > 0 ]]')
