@@ -153,27 +153,6 @@ ractive.observe('pin_code', function(new_value, old, keypath) {
   }
 });
 
-ractive.observe('previous_order', function(new_value, old, keypath) {
-  if (new_value) {
-    if (/^\\d/.test(new_value)) {
-      ractive.set('grade', new_value.substr(0,1).toUpperCase());
-      new_value = new_value.substr(1);
-    } else {
-      ractive.set('grade', new_value.substr(0,2).toUpperCase());
-      new_value = new_value.substr(2);
-    }
-    if (/^[a-e]/.test(new_value)) {
-      ractive.set('klass', new_value.substr(0,1).toUpperCase());
-      new_value = new_value.substr(1);
-    } else {
-      ractive.set('klass', new_value.substr(0,3).toUpperCase());
-      new_value = new_value.substr(3);
-    }
-    if (new_value) {
-      ractive.set('student_id', new_value);
-    }
-  }
-});
 
 ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) {
   var total = 0;
