@@ -29,7 +29,7 @@ mixin ___(exp)
               tr(class="[[ order_idx === active_order_idx ? 'info':'']]")
                 td(colspan=3)
                   form.form-inline
-                    .form-group
+                    .form-group(class="[[ this.child_name.length?'':'has-error' ]]")
                       input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Your child's name")
                     .form-group
                       select#teacher-select.form-control(value='[[this.teacher]]')
@@ -50,7 +50,8 @@ mixin ___(exp)
           button.btn.btn-primary(on-tap='add_child()')
             i.glyphicon.glyphicon-plus
             |  Add a child
-          button.btn.btn-primary(on-tap='submit()') Submit
+          +___('[[# can_submit ]]')
+            button.btn.btn-primary(intro-outro='fade', on-tap='submit()') Submit
           // button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='again') again
         +___('[[# total ]]')
           h3#total-cost.pull-right(intro-outro='fade') Total $[[total]]

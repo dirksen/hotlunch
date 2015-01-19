@@ -153,6 +153,10 @@ ractive.observe('pin_code', function(new_value, old, keypath) {
   }
 });
 
+ractive.observe('orders.*.child_name', function(new_value, old, keypath) {
+  var rslt = $.grep(data.orders, function(e){return !e.child_name});
+  ractive.set('can_submit', (rslt.length === 0));
+});
 
 ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) {
   var total = 0;
