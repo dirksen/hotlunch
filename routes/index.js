@@ -19,8 +19,7 @@ router.post('/auth', function(req, res) {
     return;
   }
   
-  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=? AND NOT orders";
-  console.log('12345' === pin_code);
+  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=? AND orders IS NULL";
   db.get(stmt, pin_code, function(err, row) {
     if (row) {
       var user_id = row.user_id;
@@ -40,7 +39,7 @@ router.post('/submit-orders', function(req, res) {
   var pin_code = reqbody.pin_code;
   var orders = reqbody.orders;
   var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=? WHERE user_id=? and pin_code=?";
-  db.run(stmt, orders, user_id, pin_code, function(row){console.log(row)});
+  db.run(stmt, orders, user_id, pin_code);
   res.send('done');
 });
 
