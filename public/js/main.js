@@ -115,7 +115,6 @@ ractive = new Ractive({
         pin_code: data.pin_code,
         orders: JSON.stringify(data.orders),
       }, function(rslt){
-        console.log(rslt);
         data.submitted = true;
         $.unblockUI();
       });
