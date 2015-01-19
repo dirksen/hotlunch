@@ -153,8 +153,10 @@ ractive.observe('pin_code', function(new_value, old, keypath) {
   }
 });
 
-ractive.observe('orders.*.child_name', function(new_value, old, keypath) {
-  var rslt = $.grep(data.orders, function(e){return !e.child_name});
+ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old, keypath) {
+  // count how many orders having blank child_name or teacher
+  var rslt = $.grep(data.orders, function(e){return !e.child_name || !e.teacher});
+  console.log(rslt);
   ractive.set('can_submit', (rslt.length === 0));
 });
 
