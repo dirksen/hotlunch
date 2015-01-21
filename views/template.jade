@@ -4,100 +4,45 @@ mixin ___(exp)
   |!{ exp.replace(/[#^]/, '/') }
 
 
+// Login screen
 +___('[[^ submitted ]]')
-  h1 Hot Lunch Order
+  +___('[[^ loggedin ]]')
+    h1 Hot Lunch Order
 
-  p Please type in the PIN code found in the notice brought home by your children.
-  p: b If you receive multiple PIN codes, pick one and discard the others.
+    p Please type in the PIN code found in the notice brought home by your children.
+    p: b If you receive multiple PIN codes, pick one and discard the others.
 
-  +___('[[# pin_error ]]')
-    .alert.alert-warning(intro-outro='fade')
-      | Invalid pin code. Please try again or use another one.
+    +___('[[# pin_error ]]')
+      .alert.alert-warning(intro-outro='fade')
+        | Invalid pin code. Please try again or use another one.
 
-  form.form-inline(class="[[loggedin?'has-success':'']]")
-    .form-group(class="[[pin_error?'has-error':'']]")
-      input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN', disabled='[[loggedin]]')
+    form.form-inline(class="[[loggedin?'has-success':'']]")
+      .form-group(class="[[pin_error?'has-error':'']]")
+        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN', disabled='[[loggedin]]')
 
-  hr
+  +___('[[# loggedin ]]')
+    nav.navbar.navbar-inverse.navbar-fixed-top(intro-outro='fade')
+      .container-fluid
+        .navbar-header
+          p.navbar-text PIN: [[ pin_code ]]
+        .collapse.navbar-collapse
+          ul.nav.navbar-nav
+            +___('[[# orders:order_idx ]]')
+              li.active
+                a(on-tap='set("active_order_idx", order_idx)', href='#') [[ child_name || 'New Order' ]]
+            +___('[[# can_submit ]]')
+              li
+                a(on-tap='add_child()', href='#') 
+                  i.glyphicon.glyphicon-plus
+                  |  Add a child
+              li(intro-outro='fade')
+                a(href='#', on-tap='submit()') Submit
+          +___('[[# orders.grand_total ]]')
+            p#grand-total.navbar-text.navbar-right(intro-outro='fade') Total $[[ orders.grand_total ]]
 
-  +___('[[# orders.length > 0 ]]')
-    #order-summary.pull-left(intro='fade')
-      .order-tables.panel.panel-default
-        +___('[[# orders:order_idx ]]')
-          table.table.table-bordered(id='order-[[ order_idx ]]')
-            tbody
-              tr(class="[[ order_idx === active_order_idx ? 'info':'']]")
-                td(colspan=3)
-                  form.form-inline
-                    .form-group(class="[[ this.child_name.length?'':'has-error' ]]")
-                      input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Your child's name")
-                    .form-group
-                      select#teacher-select.form-control(value='[[this.teacher]]')
-                        option(selected='', disabled='') Class
-                        +___('[[# GRADES ]]')
-                          option [[.]]
-                    a.btn.btn-default.glyphicon.glyphicon-chevron-right(class="[[ order_idx === active_order_idx ? 'btn-info':'']]", on-tap='show_cal(order_idx)')
-              +___('[[# order_per_day:day_idx ]]')
-                +___('[[# this:option_idx ]]')
-                  +___('[[# this ]]')
-                    tr(id="line-item-[[order_idx]]-[[day_idx]]-[[option_idx]]")
-                      td [[ dateString(menu[day_idx].date) ]]
-                      td [[ this ]] [[ menu[day_idx].options[option_idx].option ]]
-                      td $[[ line_total(day_idx, option_idx, this) ]]
-
-      .btn-toolbar
-        .btn-group
-          button.btn.btn-primary(on-tap='add_child()')
-            i.glyphicon.glyphicon-plus
-            |  Add a child
-          +___('[[# can_submit ]]')
-            button.btn.btn-primary(intro-outro='fade', on-tap='submit()') Submit
-          // button.btn.btn-primary(style='margin:0 0 100px 80%', on-tap='again') again
-        +___('[[# total ]]')
-          h3#total-cost.pull-right(intro-outro='fade') Total $[[total]]
-
-  +___('[[# orders.length && !submitted ]]')
-    +___('[[# orders:order_idx ]]')
-      .order-calendars(id="order-cal-[[ order_idx ]]", class=[[ child_name && teacher ? '' : 'blank' ]])
-        +___('[[# child_name && teacher ]]')
-          .calendar(intro-outro='fly:{x:200,easing: "cubic-bezier(.17,.67,.25,1.5)"}', class="[[ order_idx === active_order_idx ? '':'text-muted' ]]")
-            h2.alert.alert-info [[child_name]]
-            +___('[[#cals]]')
-              table.form.form-inline.table.table.table-bordered(outro='fade')
-                thead.small
-                  tr
-                    th(colspan='7') [[month]]
-                tbody
-                  tr.small
-                    td(align='center') Sun
-                    td(align='center') Mon
-                    td(align='center') Tue
-                    td(align='center') Wed
-                    td(align='center') Thu
-                    td(align='center') Fri
-                    td(align='center') Sat
-                  +___('[[# cal ]]')
-                    tr
-                      +___('[[# this ]]')
-                        td.date-cell
-                          .pull-left [[ daynum ]]
-                          +___('[[# agenda ]]')
-                            .agenda(intro-outro='fade')
-                              .text-warning.clearfix.text-center
-                                +___('[[# meal_type.toLowerCase() !== "pita" ]]')
-                                  img.pull-right(src='/images/[[meal_type.toLowerCase()]].png')
-                                | [[ meal_type ]]
-                              .list-group
-                                +___('[[# options:option_idx ]]')
-                                  a.list-group-item
-                                    select.form-control(value='[[ orders[order_idx].order_per_day[agenda.idx][option_idx] ]]', style="color:[[ orders[order_idx].order_per_day[agenda.idx][option_idx] ? '#337AB7':'' ]]")
-                                      +___('[[# [0,1,2,3,4,5] ]]')
-                                        option [[ . ]]
-                                    | [[ option ]]&nbsp;
-                                    span.text-danger ($[[ cost ]])
-
+// Confirmation screen
 +___('[[# submitted ]]')
-  h2 Hot Lunch Order Total $[[ total ]]
+  h2 Hot Lunch Order Total $[[ orders.grand_total ]]
 
   .alert.alert-success Thank you for supporting our Hot Lunch Program!
 
@@ -108,3 +53,75 @@ mixin ___(exp)
       ul
         li Address to 'Parkview Publich School'.
         li Put your child's name on the memo field of the cheque.
+
+
+// Order taking screen 
+#order-taking-form
+  +___('[[# !submitted && orders.length > 0 ]]')
+    #calendar
+      +___('[[#cals]]')
+        table.form.form-inline.table.table.table-bordered(outro='fade')
+          thead.small
+            tr
+              th(colspan='7') [[month]]
+          tbody
+            tr.small
+              td(align='center') Sun
+              td(align='center') Mon
+              td(align='center') Tue
+              td(align='center') Wed
+              td(align='center') Thu
+              td(align='center') Fri
+              td(align='center') Sat
+            +___('[[# cal ]]')
+              tr
+                +___('[[# this ]]')
+                  td.date-cell(id!='[[ agenda?"day-"+agenda.idx:"" ]]') [[ daynum ]]
+                    +___('[[# agenda ]]')
+                      +___('[[# meal_type.toLowerCase() !== "pita" ]]')
+                        img(src='/images/[[meal_type.toLowerCase()]].png')
+                      +___('[[# meal_type.toLowerCase() === "pita" ]]')
+                        h4 PITA
+
+
+
+
+    +___('[[# orders.length > 0 ]]')
+      .row
+        #order-forms.col-sm-6.form-inline
+          +___('[[# orders:order_idx ]]')
+            +___('[[# order_idx === active_order_idx ]]')
+              div(intro-outro='fade')
+                .well
+                  .form-group(class="[[ this.child_name.length?'':'has-error' ]]")
+                    input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Your child's name")
+                  .form-group
+                    select#teacher-select.form-control(value='[[this.teacher]]')
+                      option(selected='', disabled='') Class
+                      +___('[[# CLASSES ]]')
+                        option [[.]]
+
+                +___('[[# child_name && teacher ]]')
+                  +___('[[# menu:day_idx ]]')
+                    table.table.table-hover(on-mouseover="hilite_cal(day_idx)", on-mouseout="lolite_cal(day_idx)")
+                      thead
+                        tr
+                          th(colspan=2) [[ date ]] [[ meal_type.toUpperCase() ]]
+                          th.text-right
+                            +___('[[# totals[order_idx][day_idx] ]]')
+                              span(intro-outro='fade') $[[ totals[order_idx][day_idx] ]]
+                      tbody
+                        +___('[[# options:option_idx ]]')
+                          tr(class!='[[ orders[order_idx].by_days[day_idx][option_idx] ? "bg-success":"" ]]')
+                            +___('[[# meal_type === "PIZZA" ]]')
+                              td.col-sm-11.option-cell(colspan=2) [[ option ]]
+                            +___('[[# meal_type !== "PIZZA" ]]')
+                              td.col-sm-1 $[[ cost ]]
+                              td.col-sm-10.option-cell [[ option ]]
+                            td.col-sm-1
+                              select.form-control(value='[[ orders[order_idx].by_days[day_idx][option_idx] ]]')
+                                +___('[[# [0,1,2,3,4,5] ]]')
+                                  option [[ . ]]
+
+
+

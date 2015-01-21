@@ -68,22 +68,15 @@ function get_options(date, option_id) {
 }
 
 var data = {
-  GRADES: ['Ms. Shim', 'Mr. Da Ponte', 'Ms. Crockett'],
+  CLASSES: ['Ms. Shim', 'Mr. Da Ponte', 'Ms. Crockett'],
   orders: [],
   menu:menu,
   cals:cals,
   active_order_idx:0,
-  total: 0,
+  totals: [],
 
   dateString: function(d) {
     return (new Date(d)).toDateString().replace(/ \d+$/, '');
-  },
-  line_total: function (day_idx, option_idx, quantity) {
-    var agenda = menu[day_idx];
-    var cost = agenda.options[option_idx].cost
-    var total = cost * quantity;
-    if (agenda.meal_type.toLowerCase() === 'pizza' && quantity > 0) total++;
-    return total;
   },
 },
 
@@ -99,13 +92,25 @@ ractive = new Ractive({
     setTimeout(function(){listen_to_scrolling = true}, 3000);
   },
   add_child: function(){
-    ractive.push('orders', {});
-    // Somehow ractive set the teach to the first option
-    data.orders.slice(-1)[0].teacher=null;
-    setTimeout(function(){
-      $.scrollTo('.order-calendars:last', 'slow', {offset: {top: -50}});
-    }, 100);
+		// We're gonna add a new order, as array is 0-based, the active_order_idx will be the same as the current length
+		data.active_order_idx = data.orders.length;
+    ractive.push('orders', {child_name:null, teacher:null});
   },
+	hilite_cal: function(day_idx){
+		var $day_cell = $('#day-' + day_idx)
+		$day_cell.addClass('bg-info');
+		$.debounce(450, function(){
+			var top = $day_cell.position().top;
+			if (top< 90) {
+				$('#calendar').scrollTo($day_cell, 1000, {over:-10});
+			} else if (top > $('#calendar').height()) {
+				$('#calendar').scrollTo($day_cell, 1000, {over:10});
+			}
+		})();
+	},
+	lolite_cal: function(day_idx){
+		$('#day-' + day_idx).removeClass('bg-info');
+	},
   submit: function() {
     var msg = "Once submitted, you cannot change the order. Are you sure you want to go ahead?";
     if (confirm(msg)) {
@@ -124,14 +129,16 @@ ractive = new Ractive({
   oncomplete: function(){
     if (location.search == '?demo') {
       data.pin_code = 'demo9';
-      ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte",}]);
+			setTimeout(function(){
+				ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte",}]);
+			}, 1000);
     }
     $.holdReady(false);
   },
 });
 
 
-ractive.observe('pin_code', function(new_value, old, keypath) {
+ractive.observe('pin_code', function(new_value, old_value, keypath) {
   if (!data.loggedin && data.pin_code.length === 5) {
     $.blockUI(scrn_lock_style);
     // Authenticate against the server
@@ -142,8 +149,11 @@ ractive.observe('pin_code', function(new_value, old, keypath) {
         data.loggedin = true;
         data.user_id = rslt.user_id;
         data.orders = [{}];
-        $('#order-summary').affix({offset:{top:180}});
         data.pin_error = false;
+				// Force the screen to layout the calendar
+				setTimeout(function() {
+					$(window).resize();
+				}, 100);
       } else {
         data.pin_error = true;
       }
@@ -152,39 +162,39 @@ ractive.observe('pin_code', function(new_value, old, keypath) {
   }
 });
 
-ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old, keypath) {
+ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old_value, keypath) {
   // count how many orders having blank child_name or teacher
   var rslt = $.grep(data.orders, function(e){return !e.child_name || !e.teacher});
-  console.log(rslt);
   ractive.set('can_submit', (rslt.length === 0));
 });
 
-ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) {
-  var total = 0;
+ractive.observe('orders.*.by_days.*.*', function(new_value, old_value, keypath) {
   var keypath_parts = keypath.split('.');
   var order_idx = keypath_parts[1];
   var day_idx = keypath_parts[3];
-  var option_idx = keypath_parts[4];
-  setTimeout(function(){
-    var $hot_item = $('#line-item-'+order_idx+'-'+day_idx+'-'+option_idx);
-    if ($hot_item.length) {
-      $('.order-tables.panel').scrollTo($hot_item, 1000, 'elasout');
-      $hot_item.addClass('bg-success');
-      setTimeout(function(){
-        $hot_item.removeClass('bg-success');
-      }, 3000);
-    }
-  }, 100);
-  $.each(data.orders, function(order_idx, order) {
-    if (order.order_per_day) {
-      $.each(order.order_per_day, function(day_idx, quantities) {
-        $.each(quantities, function(option_idx, quantity) {
-          total += data.line_total(day_idx, option_idx, quantity);
-        });
-      })
+  var daily_menu = menu[day_idx];
+
+  var daily_total = 0;
+  $.each(data.orders[order_idx].by_days[day_idx], function(option_idx, quantity) {
+    if (quantity > 0) {
+      daily_total += quantity * daily_menu.options[option_idx].cost;
+      // For pizza, the 1st slice is $3, $2 for additional slices
+      if (daily_menu.meal_type.toUpperCase() === 'PIZZA') daily_total++;
     }
   });
-  data.total = total;
+  if (!data.totals) data.totals = [];
+  if (!data.totals[order_idx]) data.totals[order_idx] = [];
+  ractive.set('totals[' + order_idx + '][' + day_idx + ']', daily_total);
+
+  var grand_total = 0;
+  $.each(data.totals, function(_, totals_per_order){
+    var sub_total = 0;
+    $.each(totals_per_order||[], function(_, daily_total){
+      sub_total += (daily_total || 0);
+    });
+    grand_total += sub_total;
+  });
+  ractive.set('orders.grand_total', grand_total);
 });
 
 
@@ -192,30 +202,13 @@ ractive.observe('orders.*.order_per_day.*.*', function(new_value, old, keypath) 
  */
 
 $(function(){
-  function adjust_screen(){
-    $('#order-summary .panel').css('max-height', document.documentElement.clientHeight - $('#order-summary .btn-toolbar').height()*2);
-  }
-  adjust_screen();
-  $(window).scroll(function(evt){
-    var $body = $('body');
-    var ratio = $body.scrollTop() * 1.0 / $body.height();
-
-    $('.order-calendars').each(function(idx){
-      var top = this.getBoundingClientRect().top;
-      var bottom = this.getBoundingClientRect().bottom;
-      var mid_height = $(window).height() / 2;
-      if (data.active_order_idx !== idx && top < mid_height && bottom > mid_height) {
-        data.active_order_idx = idx;
-        if (!listen_to_scrolling) return;
-        var $order = $('#order-' + idx);
-        var $order_panel = $('#order-summary .panel');
-        var top = $order.position.top;
-        if (top < 0 || top > $order_panel.height() - 30);
-          $order_panel.scrollTo($order, 1000);
-        return;
-      }
-    });
-  }).resize(function(evt){
-    adjust_screen();
+  $(window).resize(function(evt){
+		var $main_content = $('#order-taking-form');
+		var $order_forms = $('#order-forms');
+		$('#calendar').css({
+			width: $main_content.width()/2-50,
+			left: $order_forms.position().left + $order_forms.width() + 50,
+		});
   });
+  //$('#calendar').affix({offset:{top:180}});
 });

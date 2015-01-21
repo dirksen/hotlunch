@@ -34,12 +34,9 @@ router.post('/auth', function(req, res) {
 
 /* Save orders */
 router.post('/submit-orders', function(req, res) {
-  var reqbody = req.body;
-  var user_id = reqbody.user_id;
-  var pin_code = reqbody.pin_code;
-  var orders = reqbody.orders;
-  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=? WHERE user_id=? and pin_code=?";
-  db.run(stmt, orders, user_id, pin_code);
+	console.log(req.body);
+  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=$order, total=$total WHERE user_id=$user_id and pin_code=$pin_code";
+  db.run(stmt, req.body);
   res.send('done');
 });
 
