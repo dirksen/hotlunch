@@ -77,9 +77,9 @@ mixin ___(exp)
               tr
                 +___('[[# this ]]')
                   td.date-cell(id!='[[ agenda?"day-"+agenda.idx:"" ]]')
-                    div [[ daynum ]]
-                      +___('[[# agenda ]]')
-                        img(src='/images/[[meal_type.toUpperCase()]].gif')
+                    .pull-right [[ daynum ]]
+                    +___('[[# agenda ]]')
+                      img(src='/images/[[meal_type.toUpperCase()]].gif')
 
 
 
