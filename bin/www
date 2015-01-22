@@ -1,4 +1,4 @@
-#!/usr/bin/env nodemon
+#!/usr/bin/env node
 var debug = require('debug')('hotlunch');
 var app = require('../app');
 
