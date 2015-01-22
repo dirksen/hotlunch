@@ -16,6 +16,10 @@ h2 {
 
 label {width: 100%; display:inline-block; cursor: pointer;}
 
+#pin-field {
+	width: 300px
+}
+
 .notice {
   background: #1f8dd6;
   padding: 0.3em 1em;

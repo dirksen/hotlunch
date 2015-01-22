@@ -41,7 +41,7 @@ router.post('/auth', function(req, res) {
 /* Save orders */
 router.post('/submit-orders', function(req, res) {
   var params = req.body;
-  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=?, total=? WHERE user_id=? and pin_code=?";
+  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=?, total=? WHERE user_id=? and pin_code=? and not orders";
   db.run(stmt, params.orders, params.total, params.user_id, params.pin_code.toUpperCase(), function(err){
     console.error(err);
   });

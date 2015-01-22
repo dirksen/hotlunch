@@ -18,7 +18,7 @@ mixin ___(exp)
 
     form.form-inline(class="[[loggedin?'has-success':'']]")
       .form-group(class="[[pin_error?'has-error':'']]")
-        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter your PIN code', disabled='[[loggedin]]')
+        input#pin-field.form-control(type='text', value='[[pin_code]]', placeholder='Enter your PIN code (case insensative)', disabled='[[loggedin]]')
 
   +___('[[# loggedin ]]')
     nav.navbar.navbar-inverse.navbar-fixed-top(intro-outro='fade')
@@ -37,6 +37,8 @@ mixin ___(exp)
                   |  Add a child
               li(intro-outro='fade')
                 a(href='#', on-tap='submit()') Submit
+          +___('[[# review_mode ]]')
+            p.navbar-text(intro-outro='fade') Your previous order. Changes not allowed.
           +___('[[# orders.grand_total ]]')
             p#grand-total.navbar-text.navbar-right(intro-outro='fade') Total $[[ orders.grand_total ]]
 
