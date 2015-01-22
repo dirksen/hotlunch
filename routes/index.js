@@ -11,15 +11,15 @@ router.get('/', function(req, res) {
 /* Authenticate. */
 router.post('/auth', function(req, res) {
   var reqbody = req.body;
-  var pin_code = reqbody.pin_code.toLowerCase();
+  var pin_code = reqbody.pin_code.toUpperCase();
 
   // Demo
-  if (pin_code === 'demo9') {
+  if (pin_code === 'DEMO9') {
     res.send({user_id: 9999999});
     return;
   }
-  
-  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=? AND orders IS NULL";
+
+  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=? AND orders=''";
   db.get(stmt, pin_code, function(err, row) {
     if (row) {
       var user_id = row.user_id;
@@ -34,9 +34,11 @@ router.post('/auth', function(req, res) {
 
 /* Save orders */
 router.post('/submit-orders', function(req, res) {
-	console.log(req.body);
-  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=$order, total=$total WHERE user_id=$user_id and pin_code=$pin_code";
-  db.run(stmt, req.body);
+  var params = req.body;
+  var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=?, total=? WHERE user_id=? and pin_code=?";
+  db.run(stmt, params.orders, params.total, params.user_id, params.pin_code.toUpperCase(), function(err){
+    console.error(err);
+  });
   res.send('done');
 });
 
