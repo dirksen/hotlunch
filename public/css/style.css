@@ -28,6 +28,9 @@ label {width: 100%; display:inline-block; cursor: pointer;}
 .date-cell .agenda {
   font-size: 12px;
 }
+.date-cell img {
+	width: 50px;
+}
 
 a {
   color: #00B7FF;
