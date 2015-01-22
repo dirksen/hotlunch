@@ -79,7 +79,6 @@ var data = {
   totals: [],
 
 	name_valid: function(name) {
-		console.log('asdf')
 		// a name is valid if it has alphabets, and at least one space
 		return /[a-z]+ +[a-z]+/i.test(name);
 	},
