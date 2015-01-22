@@ -18,7 +18,7 @@ mixin ___(exp)
 
     form.form-inline(class="[[loggedin?'has-success':'']]")
       .form-group(class="[[pin_error?'has-error':'']]")
-        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter PIN', disabled='[[loggedin]]')
+        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter your code', disabled='[[loggedin]]')
 
   +___('[[# loggedin ]]')
     nav.navbar.navbar-inverse.navbar-fixed-top(intro-outro='fade')
@@ -91,8 +91,11 @@ mixin ___(exp)
             +___('[[# order_idx === active_order_idx ]]')
               div(intro-outro='fade')
                 .well
-                  .form-group(class="[[ this.child_name.length?'':'has-error' ]]")
-                    input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Your child's name")
+                  +___("[[^ name_valid(this.child_name) ]]")
+                    label(intro-outro='fade') Please type in your child's FULL NAME
+                      br
+                  .form-group(class="[[ name_valid(this.child_name)?'':'has-error' ]]")
+                    input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Child's FULL name")
                   .form-group
                     select#teacher-select.form-control(value='[[this.teacher]]')
                       option(selected='', disabled='') Class

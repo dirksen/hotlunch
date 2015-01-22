@@ -68,7 +68,7 @@ function get_options(date, option_id) {
 }
 
 if (typeof CLASSES === 'undefined')
-	CLASSES = ['Ms. Lee', 'Mr. Wellinton'];
+  CLASSES = ['Ms. Lee', 'Mr. Wellinton'];
 
 var data = {
   CLASSES: CLASSES,
@@ -78,6 +78,11 @@ var data = {
   active_order_idx:0,
   totals: [],
 
+	name_valid: function(name) {
+		console.log('asdf')
+		// a name is valid if it has alphabets, and at least one space
+		return /[a-z]+ +[a-z]+/i.test(name);
+	},
   dateString: function(d) {
     return (new Date(d)).toDateString().replace(/ \d+$/, '');
   },
@@ -95,25 +100,25 @@ ractive = new Ractive({
     setTimeout(function(){listen_to_scrolling = true}, 3000);
   },
   add_child: function(){
-		// We're gonna add a new order, as array is 0-based, the active_order_idx will be the same as the current length
-		data.active_order_idx = data.orders.length;
+    // We're gonna add a new order, as array is 0-based, the active_order_idx will be the same as the current length
+    data.active_order_idx = data.orders.length;
     ractive.push('orders', {child_name:null, teacher:null});
   },
-	hilite_cal: function(day_idx){
-		var $day_cell = $('#day-' + day_idx)
-		$day_cell.addClass('bg-info');
-		$.debounce(450, function(){
-			var top = $day_cell.position().top;
-			if (top< 90) {
-				$('#calendar').scrollTo($day_cell, 1000, {over:-10});
-			} else if (top > $('#calendar').height()) {
-				$('#calendar').scrollTo($day_cell, 1000, {over:10});
-			}
-		})();
-	},
-	lolite_cal: function(day_idx){
-		$('#day-' + day_idx).removeClass('bg-info');
-	},
+  hilite_cal: function(day_idx){
+    var $day_cell = $('#day-' + day_idx)
+    $day_cell.addClass('bg-info');
+    $.debounce(450, function(){
+      var top = $day_cell.position().top;
+      if (top< 90) {
+        $('#calendar').scrollTo($day_cell, 1000, {over:-10});
+      } else if (top > $('#calendar').height()) {
+        $('#calendar').scrollTo($day_cell, 1000, {over:10});
+      }
+    })();
+  },
+  lolite_cal: function(day_idx){
+    $('#day-' + day_idx).removeClass('bg-info');
+  },
   submit: function() {
     var msg = "Once submitted, you cannot change the order. Are you sure you want to go ahead?";
     if (confirm(msg)) {
@@ -122,7 +127,7 @@ ractive = new Ractive({
         user_id:data.user_id,
         pin_code: data.pin_code,
         orders: JSON.stringify(data.orders),
-				total: ractive.get('orders.grand_total'),
+        total: ractive.get('orders.grand_total'),
       }, function(rslt){
         data.submitted = true;
         $.unblockUI();
@@ -133,9 +138,9 @@ ractive = new Ractive({
   oncomplete: function(){
     if (location.search == '?demo') {
       data.pin_code = 'demo9';
-			setTimeout(function(){
-				ractive.set('orders', [{"child_name":"vince","teacher":"Ms. Lee",}]);
-			}, 1000);
+      setTimeout(function(){
+        ractive.set('orders', [{"child_name":"vince","teacher":"Ms. Lee",}]);
+      }, 1000);
     }
     $.holdReady(false);
   },
@@ -154,10 +159,10 @@ ractive.observe('pin_code', function(new_value, old_value, keypath) {
         data.user_id = rslt.user_id;
         data.orders = [{}];
         data.pin_error = false;
-				// Force the screen to layout the calendar
-				setTimeout(function() {
-					$(window).resize();
-				}, 100);
+        // Force the screen to layout the calendar
+        setTimeout(function() {
+          $(window).resize();
+        }, 100);
       } else {
         data.pin_error = true;
       }
@@ -168,7 +173,8 @@ ractive.observe('pin_code', function(new_value, old_value, keypath) {
 
 ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old_value, keypath) {
   // count how many orders having blank child_name or teacher
-  var rslt = $.grep(data.orders, function(e){return !e.child_name || !e.teacher});
+	var name_valid = data.name_valid
+  var rslt = $.grep(data.orders, function(e){return !name_valid(e.child_name) || !e.teacher});
   ractive.set('can_submit', (rslt.length === 0));
 });
 
@@ -207,12 +213,12 @@ ractive.observe('orders.*.by_days.*.*', function(new_value, old_value, keypath) 
 
 $(function(){
   $(window).resize(function(evt){
-		var $main_content = $('#order-taking-form');
-		var $order_forms = $('#order-forms');
-		$('#calendar').css({
-			width: $main_content.width()/2-50,
-			left: $order_forms.position().left + $order_forms.width() + 50,
-		});
+    var $main_content = $('#order-taking-form');
+    var $order_forms = $('#order-forms');
+    $('#calendar').css({
+      width: $main_content.width()/2-50,
+      left: $order_forms.position().left + $order_forms.width() + 50,
+    });
   });
   //$('#calendar').affix({offset:{top:180}});
 });
