@@ -73,6 +73,7 @@ if (typeof CLASSES === 'undefined')
 var data = {
   CLASSES: CLASSES,
   orders: [],
+	review_mode: false,
   menu:menu,
   cals:cals,
   active_order_idx:0,
@@ -135,11 +136,13 @@ ractive = new Ractive({
     }
   },
   oncomplete: function(){
-    if (location.search == '?demo') {
-      data.pin_code = 'demo9';
-      setTimeout(function(){
-        ractive.set('orders', [{"child_name":"vince","teacher":"Ms. Lee",}]);
-      }, 1000);
+    if (location.search) {
+      data.pin_code = location.search.substr(1,99);
+			if (data.pin_code === 'demo9') {
+				setTimeout(function(){
+					ractive.set('orders', [{"child_name":"Catlen Cooey","teacher":CLASSES[0],}]);
+				}, 1000);
+			}
     }
     $.holdReady(false);
   },
@@ -162,6 +165,10 @@ ractive.observe('pin_code', function(new_value, old_value, keypath) {
         setTimeout(function() {
           $(window).resize();
         }, 100);
+      } else if ('orders' in rslt) {
+				data.review_mode = true;
+				data.loggedin = true;
+				ractive.set('orders', rslt.orders);
       } else {
         data.pin_error = true;
       }
@@ -171,6 +178,8 @@ ractive.observe('pin_code', function(new_value, old_value, keypath) {
 });
 
 ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old_value, keypath) {
+	if (data.review_mode) return false;
+
   // count how many orders having blank child_name or teacher
 	var name_valid = data.name_valid
   var rslt = $.grep(data.orders, function(e){return !name_valid(e.child_name) || !e.teacher});

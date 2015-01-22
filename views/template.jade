@@ -9,7 +9,7 @@ mixin ___(exp)
   +___('[[^ loggedin ]]')
     h1 Hot Lunch Order
 
-    p Please type in the PIN code found in the notice brought home by your children.
+    p Please type in the PIN code printed in the letter brought home by your children.
     p: b If you receive multiple PIN codes, pick one and discard the others.
 
     +___('[[# pin_error ]]')
@@ -18,7 +18,7 @@ mixin ___(exp)
 
     form.form-inline(class="[[loggedin?'has-success':'']]")
       .form-group(class="[[pin_error?'has-error':'']]")
-        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter your code', disabled='[[loggedin]]')
+        input.form-control(type='text', value='[[pin_code]]', placeholder='Enter your PIN code', disabled='[[loggedin]]')
 
   +___('[[# loggedin ]]')
     nav.navbar.navbar-inverse.navbar-fixed-top(intro-outro='fade')
@@ -28,7 +28,7 @@ mixin ___(exp)
         .collapse.navbar-collapse
           ul.nav.navbar-nav
             +___('[[# orders:order_idx ]]')
-              li.active
+              li(class="[[ active_order_idx === order_idx ? 'active' : '' ]]")
                 a(on-tap='set("active_order_idx", order_idx)', href='#') [[ child_name || 'New Order' ]]
             +___('[[# can_submit ]]')
               li
@@ -47,18 +47,23 @@ mixin ___(exp)
   .alert.alert-success Thank you for supporting our Hot Lunch Program!
 
   ul.list-group
-    li.list-group-item Please return the notice (the one with the PIN), with either cash or cheque to your child's teacher.
-    li.list-group-item If you're ordering for multiple children, return the package to the teacher of your eldest kid's.
+    li.list-group-item Please return the
+      b  Hot Lunch Order Confirmation Form
+      |  (the tear-off of the letter), with either cash or cheque to your child's teacher.
+    li.list-group-item If you're ordering for multiple children, return the package to one of your kids' teachers.
     li.list-group-item If you prefer to pay by cheque, pLease make sure:
       ul
         li Address to 'Parkview Publich School'.
         li Put your child's name on the memo field of the cheque.
+    li.list-group-item You can always come back and use the same PIN code (please jog down your code: [[ pin_code ]]) to view your order online.
+    li.list-group-item Would you like to volunteer? Contact L. Wang (linda_wongmin@hotmail.com);
 
 
 // Order taking screen 
 #order-taking-form
   +___('[[# !submitted && orders.length > 0 ]]')
     #calendar
+      h4 Every meal includes a juice box
       +___('[[#cals]]')
         table.form.form-inline.table.table.table-bordered(outro='fade')
           thead.small
@@ -95,9 +100,9 @@ mixin ___(exp)
                     label(intro-outro='fade') Please type in your child's FULL NAME
                       br
                   .form-group(class="[[ name_valid(this.child_name)?'':'has-error' ]]")
-                    input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Child's FULL name")
+                    input.form-control#child-name-box(type='text', value='[[this.child_name]]', placeholder="Child's FULL name", disabled="[[ review_mode ]]")
                   .form-group
-                    select#teacher-select.form-control(value='[[this.teacher]]')
+                    select#teacher-select.form-control(value='[[this.teacher]]',  disabled="[[ review_mode ]]")
                       option(selected='', disabled='') Class
                       +___('[[# CLASSES ]]')
                         option [[.]]
@@ -113,16 +118,17 @@ mixin ___(exp)
                               span(intro-outro='fade') $[[ totals[order_idx][day_idx] ]]
                       tbody
                         +___('[[# options:option_idx ]]')
-                          tr(class!='[[ orders[order_idx].by_days[day_idx][option_idx] ? "bg-success":"" ]]')
-                            +___('[[# meal_type === "PIZZA" ]]')
-                              td.col-sm-11.option-cell(colspan=2) [[ option ]]
-                            +___('[[# meal_type !== "PIZZA" ]]')
-                              td.col-sm-1 $[[ cost ]]
-                              td.col-sm-10.option-cell [[ option ]]
-                            td.col-sm-1
-                              select.form-control(value='[[ orders[order_idx].by_days[day_idx][option_idx] ]]')
-                                +___('[[# [0,1,2,3,4,5] ]]')
-                                  option [[ . ]]
+                          +___('[[# !review_mode || orders[order_idx].by_days[day_idx][option_idx] > 0 ]]')
+                            tr(class!='[[ orders[order_idx].by_days[day_idx][option_idx] ? "bg-success":"" ]]')
+                              +___('[[# meal_type === "PIZZA" ]]')
+                                td.col-sm-11.option-cell(colspan=2) [[ option ]]
+                              +___('[[# meal_type !== "PIZZA" ]]')
+                                td.col-sm-1 $[[ cost ]]
+                                td.col-sm-10.option-cell [[ option ]]
+                              td.col-sm-1
+                                select.form-control(value='[[ orders[order_idx].by_days[day_idx][option_idx] ]]', disabled="[[ review_mode ]]")
+                                  +___('[[# [0,1,2,3,4,5] ]]')
+                                    option [[ . ]]
 
 
 

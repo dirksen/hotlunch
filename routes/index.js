@@ -19,13 +19,19 @@ router.post('/auth', function(req, res) {
     return;
   }
 
-  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=? AND orders=''";
+  var stmt = "SELECT * FROM hotlunch_orders WHERE pin_code=?";
   db.get(stmt, pin_code, function(err, row) {
     if (row) {
-      var user_id = row.user_id;
-      var stmt = "UPDATE hotlunch_orders SET redemption_ts=DATETIME('NOW') WHERE user_id=?";
-      db.run(stmt, user_id);
-      res.send({user_id: user_id});
+			if (row.orders) {
+				// Retrive the orders
+				var orders = JSON.parse(row.orders);
+				res.send({orders:orders});
+			} else {
+				var user_id = row.user_id;
+				var stmt = "UPDATE hotlunch_orders SET redemption_ts=DATETIME('NOW') WHERE user_id=?";
+				db.run(stmt, user_id);
+				res.send({user_id: user_id});
+			}
     } else {
       res.send({});
     }
