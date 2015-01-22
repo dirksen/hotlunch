@@ -76,12 +76,10 @@ mixin ___(exp)
             +___('[[# cal ]]')
               tr
                 +___('[[# this ]]')
-                  td.date-cell(id!='[[ agenda?"day-"+agenda.idx:"" ]]') [[ daynum ]]
-                    +___('[[# agenda ]]')
-                      +___('[[# meal_type.toLowerCase() !== "pita" ]]')
-                        img(src='/images/[[meal_type.toLowerCase()]].png')
-                      +___('[[# meal_type.toLowerCase() === "pita" ]]')
-                        h4 PITA
+                  td.date-cell(id!='[[ agenda?"day-"+agenda.idx:"" ]]')
+                    div [[ daynum ]]
+                      +___('[[# agenda ]]')
+                        img(src='/images/[[meal_type.toUpperCase()]].gif')
 
 
 
