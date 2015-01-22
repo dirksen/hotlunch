@@ -67,8 +67,11 @@ function get_options(date, option_id) {
   return menu[date].options[option_id];
 }
 
+if (typeof CLASSES === 'undefined')
+	CLASSES = ['Ms. Lee', 'Mr. Wellinton'];
+
 var data = {
-  CLASSES: ['Ms. Shim', 'Mr. Da Ponte', 'Ms. Crockett'],
+  CLASSES: CLASSES,
   orders: [],
   menu:menu,
   cals:cals,
@@ -119,6 +122,7 @@ ractive = new Ractive({
         user_id:data.user_id,
         pin_code: data.pin_code,
         orders: JSON.stringify(data.orders),
+				total: ractive.get('orders.grand_total'),
       }, function(rslt){
         data.submitted = true;
         $.unblockUI();
@@ -130,7 +134,7 @@ ractive = new Ractive({
     if (location.search == '?demo') {
       data.pin_code = 'demo9';
 			setTimeout(function(){
-				ractive.set('orders', [{"child_name":"vince","teacher":"Mr. Da Ponte",}]);
+				ractive.set('orders', [{"child_name":"vince","teacher":"Ms. Lee",}]);
 			}, 1000);
     }
     $.holdReady(false);
