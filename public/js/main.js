@@ -92,7 +92,6 @@ ractive = new Ractive({
   el: 'container',
   template: '#template',
   delimiters: [ '[[', ']]' ],
-  magic: true,
   data: data,
   show_cal: function(order_idx){
     $.scrollTo('#order-cal-'+order_idx, 1000);
@@ -101,7 +100,7 @@ ractive = new Ractive({
   },
   add_child: function(){
     // We're gonna add a new order, as array is 0-based, the active_order_idx will be the same as the current length
-    data.active_order_idx = data.orders.length;
+    ractive.set('active_order_idx', ractive.get('orders.length'));
     ractive.push('orders', {child_name:null, teacher:null});
   },
   hilite_cal: function(day_idx){
@@ -124,12 +123,12 @@ ractive = new Ractive({
     if (confirm(msg)) {
       $.blockUI(scrn_lock_style);
       $.post('/submit-orders', {
-        user_id:data.user_id,
-        pin_code: data.pin_code,
-        orders: JSON.stringify(data.orders),
+        user_id:ractive.get('user_id'),
+        pin_code: ractive.get('pin_code'),
+        orders: JSON.stringify(ractive.get('orders')),
         total: ractive.get('orders.grand_total'),
       }, function(rslt){
-        data.submitted = true;
+        ractive.set('submitted', true);
         $.unblockUI();
       });
 
@@ -137,8 +136,8 @@ ractive = new Ractive({
   },
   oncomplete: function(){
     if (location.search) {
-      data.pin_code = location.search.substr(1,99);
-			if (data.pin_code === 'demo9') {
+      ractive.set('pin_code', location.search.substr(1,99));
+			if (ractive.get('pin_code') === 'demo9') {
 				setTimeout(function(){
 					ractive.set('orders', [{"child_name":"Catlen Cooey","teacher":CLASSES[0],}]);
 				}, 1000);
@@ -150,27 +149,27 @@ ractive = new Ractive({
 
 
 ractive.observe('pin_code', function(new_value, old_value, keypath) {
-  if (!data.loggedin && data.pin_code.length === 5) {
+  if (!ractive.get('loggedin') && ractive.get('pin_code.length') === 5) {
     $.blockUI(scrn_lock_style);
     // Authenticate against the server
     $.post('/auth', {
-      pin_code: data.pin_code,
+      pin_code: ractive.get('pin_code'),
     }, function(rslt) {
       if ('user_id' in rslt) {
-        data.loggedin = true;
-        data.user_id = rslt.user_id;
-        data.orders = [{}];
-        data.pin_error = false;
+        ractive.set('loggedin', true);
+        ractive.set('user_id', rslt.user_id)
+        ractive.set('orders', [{}])
+        ractive.set('pin_error', false)
         // Force the screen to layout the calendar
         setTimeout(function() {
           $(window).resize();
         }, 100);
       } else if ('orders' in rslt) {
-				data.review_mode = true;
-				data.loggedin = true;
+				ractive.set('review_mode', true)
+				ractive.set('loggedin', true)
 				ractive.set('orders', rslt.orders);
       } else {
-        data.pin_error = true;
+        ractive.set('pin_error', true)
       }
       $.unblockUI();
     });
@@ -178,11 +177,11 @@ ractive.observe('pin_code', function(new_value, old_value, keypath) {
 });
 
 ractive.observe('orders.*.child_name orders.*.teacher', function(new_value, old_value, keypath) {
-	if (data.review_mode) return false;
+	if (ractive.get('review_mode')) return false;
 
   // count how many orders having blank child_name or teacher
-	var name_valid = data.name_valid
-  var rslt = $.grep(data.orders, function(e){return !name_valid(e.child_name) || !e.teacher});
+	var name_valid = ractive.get('name_valid')
+  var rslt = $.grep(ractive.get('orders'), function(e){return !name_valid(e.child_name) || !e.teacher});
   ractive.set('can_submit', (rslt.length === 0));
 });
 
@@ -193,19 +192,19 @@ ractive.observe('orders.*.by_days.*.*', function(new_value, old_value, keypath) 
   var daily_menu = menu[day_idx];
 
   var daily_total = 0;
-  $.each(data.orders[order_idx].by_days[day_idx], function(option_idx, quantity) {
+  $.each(ractive.get('orders')[order_idx].by_days[day_idx], function(option_idx, quantity) {
     if (quantity > 0) {
       daily_total += quantity * daily_menu.options[option_idx].cost;
       // For pizza, the 1st slice is $3, $2 for additional slices
       if (daily_menu.meal_type.toUpperCase() === 'PIZZA') daily_total++;
     }
   });
-  if (!data.totals) data.totals = [];
-  if (!data.totals[order_idx]) data.totals[order_idx] = [];
+  if (!ractive.get('totals')) ractive.set('totals', [])
+  if (!ractive.get('totals')[order_idx]) ractive.set('totals[order_idx]', [])
   ractive.set('totals[' + order_idx + '][' + day_idx + ']', daily_total);
 
   var grand_total = 0;
-  $.each(data.totals, function(_, totals_per_order){
+  $.each(ractive.get('totals'), function(_, totals_per_order){
     var sub_total = 0;
     $.each(totals_per_order||[], function(_, daily_total){
       sub_total += (daily_total || 0);
