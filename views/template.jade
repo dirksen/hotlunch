@@ -26,6 +26,8 @@ mixin ___(exp)
         .navbar-header
           p.navbar-text PIN: [[ pin_code ]]
         .collapse.navbar-collapse
+          +___('[[# orders.grand_total ]]')
+            p#grand-total.navbar-text(intro-outro='fade') Total Amount $[[ orders.grand_total ]]
           ul.nav.navbar-nav
             +___('[[# orders:order_idx ]]')
               li(class="[[ active_order_idx === order_idx ? 'active' : '' ]]")
@@ -36,11 +38,9 @@ mixin ___(exp)
                   i.glyphicon.glyphicon-plus
                   |  Add a child
               li(intro-outro='fade')
-                a(href='#', on-tap='submit()') Submit
+                a#submit-btn(href='#', on-tap='submit()') Submit
           +___('[[# review_mode ]]')
             p.navbar-text(intro-outro='fade') Your previous order. Changes not allowed.
-          +___('[[# orders.grand_total ]]')
-            p#grand-total.navbar-text.navbar-right(intro-outro='fade') Total $[[ orders.grand_total ]]
 
 // Confirmation screen
 +___('[[# submitted ]]')

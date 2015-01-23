@@ -74,8 +74,14 @@ td select {
 }
 
 #grand-total {
-	margin-right: 15px;
+	margin-right: 30px;
 	color: white;
+	font-size: 20px;
+	line-height: 18px;
+}
+
+#submit-btn {
+	font-size: 20px;
 }
 
 .panel {
