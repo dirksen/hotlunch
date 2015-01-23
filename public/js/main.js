@@ -56,7 +56,7 @@ function cal(year, month) {
 }
 
 for (var m = min_month; m <= max_month; m ++) {
-  var month = year + '-' + (m+1);
+  var month = moment([year, m]).format('MMM, YYYY');
   cals.push({month:month, cal:cal(year, m)});
 }
 
@@ -84,7 +84,7 @@ var data = {
 		return /[a-z]+ +[a-z]+/i.test(name);
 	},
   dateString: function(d) {
-    return (new Date(d)).toDateString().replace(/ \d+$/, '');
+    return moment(d).format('MMM Do');
   },
 },
 

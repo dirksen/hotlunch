@@ -34,6 +34,7 @@ label {width: 100%; display:inline-block; cursor: pointer;}
 }
 .date-cell img {
 	width: 50px;
+	max-height: 50px;
 }
 
 a {

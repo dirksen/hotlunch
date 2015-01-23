@@ -116,7 +116,7 @@ mixin ___(exp)
                     table.table.table-hover(on-mouseover="hilite_cal(day_idx)", on-mouseout="lolite_cal(day_idx)")
                       thead
                         tr
-                          th(colspan=2) [[ date ]] [[ meal_type.toUpperCase() ]]
+                          th(colspan=2) [[ dateString(date) ]] --- [[ meal_type.toUpperCase() ]]
                           th.text-right
                             +___('[[# totals[order_idx][day_idx] ]]')
                               span(intro-outro='fade') $[[ totals[order_idx][day_idx] ]]
