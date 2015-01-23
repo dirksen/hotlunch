@@ -103,6 +103,12 @@ ractive = new Ractive({
     ractive.set('active_order_idx', ractive.get('orders.length'));
     ractive.push('orders', {child_name:null, teacher:null});
   },
+	del_order: function(){
+		var msg = "Are you sure you want to delete this order(just this one)?";
+		if (confirm(msg)) {
+			ractive.splice('orders', ractive.get('active_order_idx'), 1);
+		}
+	},
   hilite_cal: function(day_idx){
     var $day_cell = $('#day-' + day_idx)
     $day_cell.addClass('bg-info');

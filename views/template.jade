@@ -108,6 +108,8 @@ mixin ___(exp)
                       option(selected='', disabled='') Class
                       +___('[[# CLASSES ]]')
                         option [[.]]
+                  .form-group
+                    button#del-btn.btn.btn-warning(on-tap='del_order()') Delete Order
 
                 +___('[[# child_name && teacher ]]')
                   +___('[[# menu:day_idx ]]')
