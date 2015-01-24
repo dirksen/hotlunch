@@ -1,0 +1,28 @@
+extend layout
+
+block content
+	.panel.panel-default
+		.panel-heading
+			h2.panel-title Please log in to edit the site content
+
+		.panel-body
+			if messages.error
+				.alert.alert-warning= messages.error
+
+			form.form-horizontal(role='form', method='POST', style="margin-bottom:0;")
+				.form-group.field-username
+					label.col-sm-2.control-label(for='c1_username') Username
+					.col-sm-10
+						span(data-editor='')
+							input#c1_username.form-control(name='username', type='text')
+				.form-group.field-password
+					label.col-sm-2.control-label(for='c1_password') password
+					.col-sm-10
+						span(data-editor='')
+							input#c1_password.form-control(name='password', type='password')
+				.row
+					.col-sm-offset-2.col-sm-10
+						button.btn.btn-default(type='submit') Log in
+				input(name="r", value="#{r}", type="hidden")
+
+
