@@ -8,12 +8,7 @@ router.get('/', ensureAuthenticated, function(req, res){
 });
 
 
-router.get('/confirm-order', ensureAuthenticated, function(req, res){
-	res.render('confirm-order', {total:null});
-});
-
-
-router.post('/confirm-order', ensureAuthenticated, function(req, res){
+router.all('/confirm-order', ensureAuthenticated, function(req, res){
 	if ('pin_code' in req.body) {
 		var pin_code = req.body.pin_code;
 		function render_order() {
@@ -44,8 +39,7 @@ router.post('/confirm-order', ensureAuthenticated, function(req, res){
 			render_order();
 		}
 	} else {
-		res.status(404)        // HTTP status 404: NotFound
-			.send('Not found');
+		res.render('confirm-order', {total:null});
 	}
 });
 
