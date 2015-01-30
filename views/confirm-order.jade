@@ -1,0 +1,48 @@
+extend layout
+
+block content
+	.panel.panel-default
+		.panel-heading
+			h2.panel-title
+				a(href='/admin'): span.glyphicon.glyphicon-arrow-left
+				|  Confirm Order
+
+		.panel-body
+			if messages.error
+				.alert.alert-warning= messages.error
+			form.form.form-inline(method='post')
+				.form-group
+					input.form-control(name='pin_code', type='text', placeholder='PIN Code', value='#{pin_code||""}')
+				.form-group
+					button.btn.btn-primary Check
+			if total
+				h2(class="#{(log[0] && log[0].confirmed) ? 'bg-warning text-success':''}") Total: $#{total}
+					if log[0] && log[0].confirmed
+						|  (confirmed)
+				form.form(method='post')
+					input(type='hidden', name='pin_code', value='#{pin_code}')
+					input.btn.btn-danger(name='note', type='submit', value="Incorrect Amount")
+					input.btn.btn-danger(name='note', type='submit', value="No Cheque Num")
+					input.btn.btn-danger(name='note', type='submit', value="No Child Names")
+					br
+					br
+					input.btn.btn-success(name='note', type='submit', value="Cheque")
+					input.btn.btn-success(name='note', type='submit', value="Cash")
+				br
+				br
+				form.form(method='post')
+					input(type='hidden', name='pin_code', value='#{pin_code}')
+					.form-group
+						label Note
+						textarea.form-control(name='note')
+					.form-group
+						input.btn.btn-primary(type='submit', value='Submit')
+
+				hr
+				table.table
+					tbody
+						each entry, idx in log
+							tr(class="#{entry.confirmed ? 'bg-success':''}")
+								td= entry.note
+								td= entry.ts
+

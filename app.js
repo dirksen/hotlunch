@@ -9,6 +9,8 @@ var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy
 var url = require('url');
 var session = require('cookie-session')
+var sqlite3 = require('sqlite3').verbose();
+module.db = new sqlite3.Database('db');
 
 var routes = require('./routes/index');
 
@@ -29,7 +31,6 @@ app.use(cookieParser('keyboard cat'));
 app.use(session({
 	secret: 'keyboard cat',
 	resave: false,
-	maxAge: 60000,
 	saveUninitialized: true
 }));
 app.use(passport.initialize());
@@ -46,9 +47,10 @@ app.use(flash());
  */
 var users = [
 	{ id: 1, username: 'admin', password: 'terces' }
-	, { id: 2, username: 'bfadmin', password: 'bfterces' }
-	, { id: 3, username: 'translator', password: 'frterces' }
 ];
+try {
+	users = require('./users.json');
+} catch(err) {}
 
 
 function findById(id, fn) {
@@ -140,7 +142,6 @@ app.post('/login', function(req, res, next) {
 		}
 		req.logIn(user, function(err) {
 			if (err) { return next(err); }
-			console.error('fuck', req.isAuthenticated());
 			return res.redirect(query.r ? query.r : '');
 		});
 	})(req, res, next);
@@ -154,7 +155,6 @@ app.get('/logout', function(req, res){
 
 
 module.ensureAuthenticated = function(req, res, next) {
-	console.error('fuckfuck', req.isAuthenticated());
 	if (req.isAuthenticated()) { return next(); }
 
 	if (req.originalUrl) {
