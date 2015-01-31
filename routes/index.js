@@ -41,7 +41,7 @@ router.post('/auth', function(req, res) {
 });
 
 /* :orders: is a hash, break it up into a table of order items */
-function break_up(orders) {
+function break_up(orders, pin_code) {
 	try {
 		orders = JSON.parse(orders);
 	} catch (err) {
@@ -56,15 +56,17 @@ function break_up(orders) {
 		var stmt_params = [];
 		order.by_days.forEach(function(quantity_list, day_idx) {
 			quantity_list.forEach(function(quantity, option_idx) {
-				stmt += '(?, ?, ?, ?, ?, ?, ?),';
+				stmt += '(?, ?, ?, ?, ?, ?, ?, ?, ?),';
 				stmt_params = stmt_params.concat([
 					order.child_name
 					, order.teacher
 					, menu[day_idx].date
 					, menu[day_idx].options[option_idx].option
 					, menu[day_idx].options[option_idx].cost
-					, /PIZZA/i.test(menu[day_idx].meal_type)
+					, menu[day_idx].options[option_idx].cost
+					, menu[day_idx].meal_type
 					, quantity
+					, pin_code
 				]);
 			});
 		});
@@ -76,20 +78,21 @@ function break_up(orders) {
 /* Save orders */
 router.post('/submit-orders', function(req, res) {
   var params = req.body;
+	var pin_code = params.pin_code.toUpperCase();
   var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=?, total=? WHERE user_id=? and pin_code=? and not orders";
-  db.run(stmt, params.orders, params.total, params.user_id, params.pin_code.toUpperCase(), function(err){
+  db.run(stmt, params.orders, params.total, params.user_id, pin_code, function(err){
 		if (err) throw(err);
-		break_up(params.orders);
+		break_up(params.orders, pin_code);
   });
   res.send('done');
 });
 
 router.get('/break-up-orders', function(req, res) {
-	db.each("select orders from hotlunch_orders", function(err, row) {
+	db.each("select orders, pin_code from hotlunch_orders where total>0", function(err, row) {
 		if (err) throw(err);
-		break_up(row.orders);
+		break_up(row.orders, row.pin_code);
 	}, function(err, row_cnt) {
-		res.send('Breaking up into ' + row_cnt + ' items.\n');
+		res.send('Breaking up ' + row_cnt + ' orders.\n');
 	});
 });
 
