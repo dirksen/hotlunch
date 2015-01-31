@@ -2,9 +2,27 @@ var express = require('express');
 var router = express.Router();
 var ensureAuthenticated = module.parent.ensureAuthenticated;
 var db = module.parent.db;
+var async = require('async');
 
 router.get('/', ensureAuthenticated, function(req, res){
-	res.render('admin');
+	async.parallel([
+		function(callback){
+			db.get('select count(*) as family_cnt from hotlunch_orders where total>0', function(err, row){
+				if (err) throw(err);
+				res.locals.family_cnt = row.family_cnt;
+				callback();
+			});
+		},
+		function(callback){
+			db.each('select distinct child_name, teacher from order_items where quantity>0', function(){}, function(err, row_cnt){
+				if (err) throw(err);
+				res.locals.order_cnt = row_cnt;
+				callback();
+			});
+		},
+	], function(){
+		res.render('admin');
+	});
 });
 
 

@@ -17,6 +17,7 @@
 		"passport-local": "*",
 		"cookie-session": "*",
     "sqlite3": "*",
+		"async": "*",
     "jade": "~1.6.0"
   }
 }
