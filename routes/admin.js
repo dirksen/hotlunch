@@ -14,6 +14,13 @@ router.get('/', ensureAuthenticated, function(req, res){
 			});
 		},
 		function(callback){
+			db.get('select count(*) as cnt from confirmation_log where confirmed', function(){}, function(err, row){
+				if (err) throw(err);
+				res.locals.confirmed_cnt = row.cnt;
+				callback();
+			});
+		},
+		function(callback){
 			db.each('select distinct child_name, teacher from order_items where quantity>0', function(){}, function(err, row_cnt){
 				if (err) throw(err);
 				res.locals.order_cnt = row_cnt;
