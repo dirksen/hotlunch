@@ -20,7 +20,7 @@ router.all('/confirm-orders', ensureAuthenticated, function(req, res){
 					res.render('confirm-orders', {total:null});
 				} else {
 					total = row ? row.total:null;
-					db.all("SELECT * from confirmation_log where pin_code=? order by datetime(ts) desc", pin_code, function(err, log){
+					db.all("SELECT confirmed, note, datetime(ts, 'localtime') as ts from confirmation_log where pin_code=? order by datetime(ts) desc", pin_code, function(err, log){
 						if (err)
 							throw(err);
 						res.render('confirm-orders', {pin_code: pin_code, total: total, log:log});
