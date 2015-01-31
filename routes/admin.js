@@ -8,7 +8,7 @@ router.get('/', ensureAuthenticated, function(req, res){
 });
 
 
-router.all('/confirm-order', ensureAuthenticated, function(req, res){
+router.all('/confirm-orders', ensureAuthenticated, function(req, res){
 	if ('pin_code' in req.body) {
 		var pin_code = req.body.pin_code;
 		function render_order() {
@@ -17,13 +17,13 @@ router.all('/confirm-order', ensureAuthenticated, function(req, res){
 				if (err || !row) {
 					console.error(err);
 					req.flash('error', 'Incorrect PIN');
-					res.render('confirm-order', {total:null});
+					res.render('confirm-orders', {total:null});
 				} else {
 					total = row ? row.total:null;
 					db.all("SELECT * from confirmation_log where pin_code=? order by datetime(ts) desc", pin_code, function(err, log){
 						if (err)
 							throw(err);
-						res.render('confirm-order', {pin_code: pin_code, total: total, log:log});
+						res.render('confirm-orders', {pin_code: pin_code, total: total, log:log});
 					});
 				}
 			});
@@ -39,8 +39,11 @@ router.all('/confirm-order', ensureAuthenticated, function(req, res){
 			render_order();
 		}
 	} else {
-		res.render('confirm-order', {total:null});
+		res.render('confirm-orders', {total:null});
 	}
+});
+
+router.all('/purchase-orders', ensureAuthenticated, function(req, res){
 });
 
 module.exports = router;
