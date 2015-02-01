@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var db = module.parent.db;
+var async = require('async');
 
 // Import menu data
 require('../public/js/data');
@@ -48,30 +49,33 @@ function break_up(orders, pin_code) {
 		return
 	}
 	orders.forEach(function(order) {
-		// Clear the old records by the same child
-		db.run('delete from order_items where child_name=? and teacher=?', [
-			order.child_name, order.teacher
+		async.series([
+			function(callback){
+				// Clear the old records by the same child
+				db.run('delete from order_items where pin_code=?', [pin_code], function(err){callback()});
+			},
+			function(callback){
+				var stmt = db.prepare('insert into order_items values (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+				order.by_days.forEach(function(quantity_list, day_idx) {
+					quantity_list.forEach(function(quantity, option_idx) {
+						if (quantity > 0) {
+							stmt.run([
+								order.child_name
+								, order.teacher
+								, menu[day_idx].date
+								, menu[day_idx].options[option_idx].option
+								, menu[day_idx].options[option_idx].cost
+								, menu[day_idx].options[option_idx].cost
+								, menu[day_idx].meal_type
+								, quantity
+								, pin_code
+							]);
+						}
+					});
+				});
+				callback();
+			},
 		]);
-		var stmt = 'insert into order_items values ';
-		var stmt_params = [];
-		order.by_days.forEach(function(quantity_list, day_idx) {
-			quantity_list.forEach(function(quantity, option_idx) {
-				stmt += '(?, ?, ?, ?, ?, ?, ?, ?, ?),';
-				stmt_params = stmt_params.concat([
-					order.child_name
-					, order.teacher
-					, menu[day_idx].date
-					, menu[day_idx].options[option_idx].option
-					, menu[day_idx].options[option_idx].cost
-					, menu[day_idx].options[option_idx].cost
-					, menu[day_idx].meal_type
-					, quantity
-					, pin_code
-				]);
-			});
-		});
-		stmt = stmt.replace(/,$/, ';');
-		db.run(stmt, stmt_params);
 	});
 }
 
