@@ -64,8 +64,8 @@ function break_up(orders, pin_code) {
 								, order.teacher
 								, menu[day_idx].date
 								, menu[day_idx].options[option_idx].option
-								, menu[day_idx].options[option_idx].cost
-								, menu[day_idx].options[option_idx].cost
+								, menu[day_idx].options[option_idx].price
+								, menu[day_idx].options[option_idx].price
 								, menu[day_idx].meal_type
 								, quantity
 								, pin_code

@@ -200,7 +200,7 @@ ractive.observe('orders.*.by_days.*.*', function(new_value, old_value, keypath) 
   var daily_total = 0;
   $.each(ractive.get('orders')[order_idx].by_days[day_idx], function(option_idx, quantity) {
     if (quantity > 0) {
-      daily_total += quantity * daily_menu.options[option_idx].cost;
+      daily_total += quantity * daily_menu.options[option_idx].price;
       // For pizza, the 1st slice is $3, $2 for additional slices
       if (daily_menu.meal_type.toUpperCase() === 'PIZZA') daily_total++;
     }

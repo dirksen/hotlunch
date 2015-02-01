@@ -127,7 +127,7 @@ mixin ___(exp)
                               +___('[[# meal_type === "PIZZA" ]]')
                                 td.col-sm-11.option-cell(colspan=2) [[ option ]]
                               +___('[[# meal_type !== "PIZZA" ]]')
-                                td.col-sm-1 $[[ cost ]]
+                                td.col-sm-1 $[[ price ]]
                                 td.col-sm-10.option-cell [[ option ]]
                               td.col-sm-1
                                 select.form-control(value='[[ orders[order_idx].by_days[day_idx][option_idx] ]]', disabled="[[ review_mode ]]")
