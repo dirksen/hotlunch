@@ -86,7 +86,7 @@ router.post('/submit-orders', function(req, res) {
   var stmt = "UPDATE hotlunch_orders SET submit_ts=DATETIME('NOW'), orders=?, total=? WHERE user_id=? and pin_code=? and not orders";
   db.run(stmt, params.orders, params.total, params.user_id, pin_code, function(err){
 		if (err) throw(err);
-		break_up(params.orders, pin_code);
+		//break_up(params.orders, pin_code);
   });
   res.send('done');
 });
