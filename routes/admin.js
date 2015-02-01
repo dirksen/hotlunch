@@ -69,6 +69,9 @@ router.all('/confirm-orders', ensureAuthenticated, function(req, res){
 });
 
 router.all('/purchase-orders', ensureAuthenticated, function(req, res){
+	db.all("select lunch_date, meal_type, option, sum(quantity) as quantity, true_cost, case meal_type when 'PIZZA' then round(sum(quantity)/8.)*true_cost else sum(quantity)*true_cost end as cost from order_items where quantity>0 group by lunch_date, option order by lunch_date", function(err, rows) {
+		res.send(rows);
+	});
 });
 
 module.exports = router;
