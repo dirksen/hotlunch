@@ -59,13 +59,16 @@ function break_up(orders, pin_code) {
 				order.by_days.forEach(function(quantity_list, day_idx) {
 					quantity_list.forEach(function(quantity, option_idx) {
 						if (quantity > 0) {
+							// Convert date to ISO format in UTC
+							var lunch_date = menu[day_idx].date;
+							lunch_date = new Date(Date.parse(lunch_date)).toISOString();
 							stmt.run([
 								order.child_name
 								, order.teacher
-								, menu[day_idx].date
+								, lunch_date
 								, menu[day_idx].options[option_idx].option
 								, menu[day_idx].options[option_idx].price
-								, menu[day_idx].options[option_idx].price
+								, menu[day_idx].options[option_idx].cost
 								, menu[day_idx].meal_type
 								, quantity
 								, pin_code

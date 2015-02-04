@@ -68,9 +68,22 @@ router.all('/confirm-orders', ensureAuthenticated, function(req, res){
 	}
 });
 
-router.all('/purchase-orders', ensureAuthenticated, function(req, res){
-	db.all("select lunch_date, meal_type, option, sum(quantity) as quantity, true_cost, case meal_type when 'PIZZA' then round(sum(quantity)/8.)*true_cost else sum(quantity)*true_cost end as cost from order_items where quantity>0 group by lunch_date, option order by lunch_date", function(err, rows) {
-		res.send(rows);
+router.all('/purchase-order', ensureAuthenticated, function(req, res){
+	//db.all("with coming as (select min(lunch_date) as date from order_items where lunch_date > datetime('now')) select date(lunch_date, 'localtime') as lunch_date, meal_type, option, sum(quantity) quantity, cost from order_items, coming where lunch_date=coming.date group by option", function(err, rows) {
+	db.all("with coming as (select min(lunch_date) as date from order_items where lunch_date > datetime('2015-03-01')) select date(lunch_date, 'localtime') as lunch_date, meal_type, option, sum(quantity) quantity, cost from order_items, coming where lunch_date=coming.date group by option", function(err, rows) {
+		if (err) throw(err);
+		// Adjust quantity for PIZZA (8 slices = 1 pizza)
+		// Calculate total
+		var total = 0;
+		rows.forEach(function(row){
+			if (row.meal_type === 'PIZZA') {
+				row.quantity = Math.ceil(row.quantity / 8);
+				row.option = 'Cheese Pizza';
+			}
+			row.cost = row.quantity * row.cost;
+			total += row.cost;
+		});
+		res.render('purchase-order', {order:rows, total:total});
 	});
 });
 

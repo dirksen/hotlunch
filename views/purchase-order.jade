@@ -1,0 +1,29 @@
+extend layout
+
+block content
+	.panel.panel-default
+		.panel-heading
+			h2.panel-title
+				a(href='/admin'): span.glyphicon.glyphicon-arrow-left
+				|  Purchase Order
+
+		.panel-body
+			h2 #{order[0].meal_type}
+				.small #{order[0].lunch_date} 
+			if messages.error
+				.alert.alert-warning= messages.error
+			table.table.table-bordered
+				thead
+					tr
+						th Variety
+						th.text-right Quantity
+						th.text-right Sub-Total
+				tbody
+					for item in order
+						tr
+							td= item.option
+							td.text-right= item.quantity
+							td.text-right $#{item.cost}
+					tr
+						td.text-right(colspan=2) Total
+						td.text-right $#{total}
