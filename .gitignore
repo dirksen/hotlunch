@@ -3,3 +3,4 @@ data.js
 classes.js
 node_modules/*
 *.tsv
+users.json
